@@ -1,0 +1,15 @@
+[program:osdj-worker]
+process_name=%(program_name)s_%(process_num)02d
+directory=/var/www/osdj
+command=/usr/bin/php /var/www/osdj/artisan queue:work database --sleep=3 --tries=3 --timeout=60 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/log/osdj-worker.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stopwaitsecs=90

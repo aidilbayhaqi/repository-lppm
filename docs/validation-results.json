@@ -1,0 +1,230 @@
+{
+  "release": "1.6.0",
+  "date": "2026-11-13",
+  "status": "staging_candidate",
+  "source": "Repository-LPPM-1.5(1).zip",
+  "baseline": {
+    "tests": 128,
+    "assertions": 669
+  },
+  "phpunit": {
+    "tool": "phpunit",
+    "result": "passed",
+    "tests": 144,
+    "passed": 144,
+    "assertions": 774,
+    "duration_ms": 9794
+  },
+  "browser": {
+    "passed": true,
+    "checks": 37,
+    "results": [
+      {
+        "name": "HTTP /",
+        "passed": true,
+        "detail": 200
+      },
+      {
+        "name": "Official university wordmark",
+        "passed": true
+      },
+      {
+        "name": "Guide navigation",
+        "passed": true
+      },
+      {
+        "name": "Layout landing desktop",
+        "passed": true,
+        "detail": [
+          1440,
+          1440
+        ]
+      },
+      {
+        "name": "Layout landing 390",
+        "passed": true,
+        "detail": [
+          390,
+          390
+        ]
+      },
+      {
+        "name": "Mobile guide 390",
+        "passed": true
+      },
+      {
+        "name": "Layout landing 320",
+        "passed": true,
+        "detail": [
+          320,
+          320
+        ]
+      },
+      {
+        "name": "Mobile guide 320",
+        "passed": true
+      },
+      {
+        "name": "HTTP /login",
+        "passed": true,
+        "detail": 200
+      },
+      {
+        "name": "HTTP /admin/karya/publikasi/create",
+        "passed": true,
+        "detail": 200
+      },
+      {
+        "name": "Only first stage visible",
+        "passed": true
+      },
+      {
+        "name": "Missing title blocks progression",
+        "passed": true
+      },
+      {
+        "name": "NIDN shown dynamically",
+        "passed": true
+      },
+      {
+        "name": "Missing NIDN blocks progression",
+        "passed": true
+      },
+      {
+        "name": "Stage two visible",
+        "passed": true
+      },
+      {
+        "name": "Dynamic reference rows enabled",
+        "passed": true
+      },
+      {
+        "name": "Unused reference rows excluded",
+        "passed": true
+      },
+      {
+        "name": "Cover heading follows selection",
+        "passed": true
+      },
+      {
+        "name": "New file heading follows selection",
+        "passed": true
+      },
+      {
+        "name": "Layout form files 390",
+        "passed": true,
+        "detail": [
+          390,
+          390
+        ]
+      },
+      {
+        "name": "Layout form files 320",
+        "passed": true,
+        "detail": [
+          320,
+          320
+        ]
+      },
+      {
+        "name": "Visual spinner and locked submit",
+        "passed": true
+      },
+      {
+        "name": "Saved cover and certificate",
+        "passed": true
+      },
+      {
+        "name": "Draft title saved",
+        "passed": true
+      },
+      {
+        "name": "Layout detail 320",
+        "passed": true,
+        "detail": [
+          320,
+          320
+        ]
+      },
+      {
+        "name": "Edit reuses reference author",
+        "passed": true
+      },
+      {
+        "name": "Existing documents retained in edit",
+        "passed": true
+      },
+      {
+        "name": "Admin self review requires explanation",
+        "passed": true
+      },
+      {
+        "name": "History at most five entries",
+        "passed": true
+      },
+      {
+        "name": "HTTP /admin/import",
+        "passed": true,
+        "detail": 200
+      },
+      {
+        "name": "Real XLSX downloaded",
+        "passed": true
+      },
+      {
+        "name": "Excel preview reads names",
+        "passed": true
+      },
+      {
+        "name": "Excel preview accepts all values",
+        "passed": true
+      },
+      {
+        "name": "Excel batch committed as draft",
+        "passed": true
+      },
+      {
+        "name": "HTTP /admin/karya/publikasi?q=Import%20Excel%20browser%201794538572758",
+        "passed": true,
+        "detail": 200
+      },
+      {
+        "name": "Imported work appears",
+        "passed": true
+      },
+      {
+        "name": "No browser exceptions",
+        "passed": true,
+        "detail": []
+      }
+    ],
+    "errors": []
+  },
+  "xlsx_independent_reader": {
+    "library": "openpyxl",
+    "columns": 39,
+    "sheet": "Data",
+    "freeze_panes": "A2",
+    "column_format": "Text",
+    "roundtrip_browser_import": "passed"
+  },
+  "checks": {
+    "pint": "passed",
+    "composer_validate": "passed",
+    "vite_build": "passed",
+    "view_cache": "passed",
+    "route_cache": "passed",
+    "git_diff_check": "passed"
+  },
+  "not_run": [
+    "Docker build/runtime",
+    "MySQL concurrency/EXPLAIN",
+    "Redis multi-replica",
+    "ClamAV/SMTP services",
+    "TLS and load testing",
+    "backup/restore target server",
+    "Excel desktop/LibreOffice",
+    "Safari/Firefox",
+    "fresh dependency advisory audit"
+  ]
+}

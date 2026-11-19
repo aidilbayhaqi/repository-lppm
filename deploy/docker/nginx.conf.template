@@ -1,0 +1,67 @@
+upstream repository_php {
+    least_conn;
+    server app1:9000 max_fails=3 fail_timeout=15s;
+    server app2:9000 max_fails=3 fail_timeout=15s;
+}
+limit_req_zone $binary_remote_addr zone=requests:10m rate=15r/s;
+server_tokens off;
+
+server {
+    listen 80 default_server;
+    server_name _;
+    return 444;
+}
+server {
+    listen 80;
+    server_name ${APP_HOST};
+    return 301 https://${APP_HOST}$request_uri;
+}
+server {
+    listen 443 ssl default_server;
+    ssl_reject_handshake on;
+}
+server {
+    listen 443 ssl;
+    server_name ${APP_HOST};
+    ssl_certificate /etc/nginx/tls/fullchain.pem;
+    ssl_certificate_key /etc/nginx/tls/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    root /var/www/html/public;
+    index index.php;
+    charset utf-8;
+    client_max_body_size 25m;
+    client_body_timeout 20s;
+    keepalive_timeout 30s;
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location = /index.php {
+        limit_req zone=requests burst=40 nodelay;
+        limit_req_status 429;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /var/www/html/public/index.php;
+        fastcgi_param DOCUMENT_ROOT /var/www/html/public;
+        fastcgi_param HTTPS on;
+        fastcgi_param SERVER_PORT 443;
+        fastcgi_param HTTP_HOST ${APP_HOST};
+        # Do not pass client-supplied proxy headers through to PHP.
+        fastcgi_param HTTP_X_FORWARDED_FOR "";
+        fastcgi_param HTTP_X_FORWARDED_PROTO "";
+        fastcgi_param HTTP_X_FORWARDED_HOST "";
+        fastcgi_connect_timeout 5s;
+        fastcgi_read_timeout 60s;
+        fastcgi_pass repository_php;
+        fastcgi_next_upstream error timeout invalid_header;
+        fastcgi_hide_header X-Powered-By;
+    }
+    location ~ \.php$ { return 404; }
+    location ^~ /storage/ { return 404; }
+    location ~ /\.(?!well-known).* { deny all; }
+    location ^~ /build/ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff;
+    }
+}

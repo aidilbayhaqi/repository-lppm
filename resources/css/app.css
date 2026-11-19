@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@source '../views';
+@source '../js';
+
+/* The original OSDJ-LPPM stylesheet, restored from release 1.6. */
+@import './repository.css';
+@import './experience.css';
+@import './journal-experience.css';
+@import './guided-submission.css';
+@import './ui-polish.css';

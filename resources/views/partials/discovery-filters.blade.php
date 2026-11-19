@@ -1,0 +1,16 @@
+<div class="discovery-fields">
+    <div class="filter-field"><label for="year">Tahun terbit</label><input id="year" type="number" name="year" min="1901" max="2100" value="{{ request('year') }}" placeholder="Semua tahun"></div>
+    @if(($type ?? 'publikasi') === 'publikasi')
+        <div class="filter-field"><label for="publication_type">Jenis karya ilmiah</label><select id="publication_type" name="publication_type"><option value="">Semua jenis</option>@foreach(\App\Support\JournalMetadata::TYPES as $key=>$label)<option value="{{ $key }}" @selected(request('publication_type') === $key)>{{ $label }}</option>@endforeach</select></div>
+        <div class="filter-field"><label for="sinta_rank">Peringkat SINTA</label><select id="sinta_rank" name="sinta_rank"><option value="">Semua peringkat</option>@foreach(range(1,6) as $rank)<option value="{{ $rank }}" @selected(request('sinta_rank') == $rank)>SINTA {{ $rank }}</option>@endforeach</select></div>
+        <div class="filter-field"><label for="scopus_quartile">Kuartil Scopus</label><select id="scopus_quartile" name="scopus_quartile"><option value="">Semua kuartil</option>@foreach(['Q1','Q2','Q3','Q4'] as $rank)<option value="{{ $rank }}" @selected(request('scopus_quartile') === $rank)>{{ $rank }}</option>@endforeach</select></div>
+        <div class="filter-field"><label for="scopus_indexed">Cakupan Scopus</label><select id="scopus_indexed" name="scopus_indexed"><option value="">Semua karya</option><option value="1" @selected(request('scopus_indexed') === '1')>Hanya terindeks Scopus</option></select></div>
+    @endif
+    @foreach(['fakultas_id'=>['Fakultas',$faculties,'nama_fakultas','fakultas'], 'program_studi_id'=>['Program studi',$programs,'nama','program-studi'], 'dosen_id'=>['Dosen',$lecturers,'nama','dosen'], 'pengindeks_id'=>['Pengindeks referensi',$indexers,'nama','pengindeks']] as $key=>[$label,$options,$field,$lookup])
+        @if($key !== 'pengindeks_id' || ($type ?? 'publikasi') === 'publikasi')
+        <div class="filter-field"><label for="{{ $key }}">{{ $label }}</label><select id="{{ $key }}" name="{{ $key }}" data-lookup="{{ route('lookups',$lookup) }}"><option value="">Semua {{ strtolower($label) }}</option>@foreach($options as $option)<option value="{{ $option->id }}" @selected(request($key) == $option->id)>{{ $option->$field }}</option>@endforeach</select></div>
+        @endif
+    @endforeach
+    @if($adminFilters ?? false)<div class="filter-field"><label for="visibility">Akses metadata</label><select id="visibility" name="visibility"><option value="">Semua akses</option>@foreach(['public'=>'Publik','internal'=>'Internal','private'=>'Privat tim karya','restricted'=>'Terbatas'] as $value=>$label)<option value="{{ $value }}" @selected(request('visibility') === $value)>{{ $label }}</option>@endforeach</select></div>@endif
+    <div class="filter-field"><label for="sort">Urutkan</label><select id="sort" name="sort">@foreach((($adminFilters ?? false) ? ['updated'=>'Terakhir diperbarui'] : []) + ['newest'=>'Tahun terbaru','oldest'=>'Tahun terlama','title'=>'Judul A–Z'] as $value=>$label)<option value="{{ $value }}" @selected(request('sort', ($adminFilters ?? false) ? 'updated' : 'newest') === $value)>{{ $label }}</option>@endforeach</select></div>
+</div>

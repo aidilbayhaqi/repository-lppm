@@ -1,0 +1,78 @@
+name: Repository checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: sqlite
+            database_name: ':memory:'
+          - database: mysql
+            database_name: repository_test
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: repository_test
+          MYSQL_ROOT_PASSWORD: ci-only-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only-password"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: ${{ matrix.database }}
+      DB_DATABASE: ${{ matrix.database_name }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, dom, fileinfo, pdo_sqlite, pdo_mysql, simplexml, zip
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Release safety policies and tooling regressions
+        run: |
+          node tools/release-safety.mjs --source .
+          node --test tests/Tooling/release-safety.test.mjs
+      - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: composer validate --strict
+      - run: cp .env.example .env
+      - run: php artisan key:generate
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: php artisan test --compact
+      - run: composer audit
+      - run: npm audit
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify Docker context exclusions
+        run: node tools/release-safety.mjs --source .
+      - name: Build and run isolated tests
+        run: |
+          docker build --target testing -t osdj-tests .
+          docker run --rm osdj-tests
+      - name: Build production targets
+        run: |
+          docker build --target app -t osdj-app .
+          docker build --target web -t osdj-web .

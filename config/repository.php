@@ -1,0 +1,15 @@
+<?php
+
+return [
+    // Disable self-registration in production unless the institution explicitly enables it.
+    'registration_enabled' => env('REGISTRATION_ENABLED', env('APP_ENV') !== 'production'),
+    'require_verified_email' => env('REQUIRE_VERIFIED_EMAIL', env('APP_ENV') === 'production'),
+    'remember_days' => 14,
+    'session_absolute_minutes' => (int) env('SESSION_ABSOLUTE_MINUTES', 480),
+    'trusted_proxies' => array_filter(explode(',', env('TRUSTED_PROXIES', ''))),
+    'documents_disk' => env('DOCUMENTS_DISK', 'local'),
+    'scan_required' => env('DOCUMENT_SCAN_REQUIRED', env('APP_ENV') === 'production'),
+    'clamav_host' => env('CLAMAV_HOST', '127.0.0.1'),
+    'clamav_port' => (int) env('CLAMAV_PORT', 3310),
+    'clamav_timeout' => (int) env('CLAMAV_TIMEOUT', 15),
+];

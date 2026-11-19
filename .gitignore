@@ -1,0 +1,46 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Deployment material stays outside source control and release ZIPs.
+/deploy/secrets/
+/deploy/tls/
+.env.production
+
+!.env.docker.example
+
+# BEGIN OSDJ RELEASE SAFETY — DevSecOps 2026-11-19
+/.lppm-updater-backups/
+/.lppm-*/
+/Update-OSDJ-*/
+/Fix-OSDJ-*/
+/Rollback-OSDJ-*/
+*.zip
+*.sql
+*.pem
+*.key
+# END OSDJ RELEASE SAFETY

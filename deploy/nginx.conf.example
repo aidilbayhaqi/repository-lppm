@@ -1,0 +1,30 @@
+# Sesuaikan domain, certificate dan socket PHP-FPM; uji nginx -t di staging.
+server {
+    listen 80;
+    server_name repository.example.org;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name repository.example.org;
+    ssl_certificate /etc/letsencrypt/live/repository.example.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/repository.example.org/privkey.pem;
+    root /var/www/osdj/public;
+    index index.php;
+    charset utf-8;
+    client_max_body_size 25m;
+
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location = /index.php {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+        fastcgi_hide_header X-Powered-By;
+    }
+    location ~ \.php$ { return 404; }
+    location ^~ /storage/ { return 404; }
+    location ~ /\.(?!well-known).* { deny all; }
+    location /build/ { expires 1y; add_header Cache-Control "public, immutable"; }
+}

@@ -1,0 +1,100 @@
+name: osdj-repository
+
+x-app: &app
+  image: osdj-repository:${RELEASE_TAG:-local}
+  build:
+    context: .
+    target: app
+  env_file: .env.production
+  restart: unless-stopped
+  init: true
+  volumes:
+    - documents:/var/www/html/storage/app/private
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  security_opt:
+    - no-new-privileges:true
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  networks: [backend]
+
+services:
+  app1:
+    <<: *app
+  app2:
+    <<: *app
+  worker:
+    <<: *app
+    command: [php, artisan, queue:work, database, --sleep=2, --tries=3, --timeout=60, --max-time=3600]
+    stop_grace_period: 90s
+  scheduler:
+    <<: *app
+    command: [php, artisan, schedule:work]
+  web:
+    image: osdj-repository-web:${RELEASE_TAG:-local}
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    environment:
+      APP_HOST: ${APP_HOST:?Set APP_HOST in .env.production}
+      NGINX_ENVSUBST_FILTER: '^APP_HOST$'
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./deploy/tls:/etc/nginx/tls:ro
+    depends_on: [app1, app2]
+    networks: [backend]
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:?Set DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME:?Set DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets: [mysql_root_password]
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - database:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, "mysqladmin ping -h 127.0.0.1 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks: [backend]
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    command: [sh, -c, 'exec redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction --requirepass "$$REDIS_PASSWORD"']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [CMD-SHELL, 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [backend]
+  clamav:
+    image: clamav/clamav:1.4
+    restart: unless-stopped
+    volumes:
+      - signatures:/var/lib/clamav
+    networks: [backend]
+
+volumes:
+  database:
+  redis-data:
+  documents:
+  signatures:
+networks:
+  backend:
+    driver: bridge
+
+secrets:
+  mysql_root_password:
+    file: ./deploy/secrets/mysql_root_password

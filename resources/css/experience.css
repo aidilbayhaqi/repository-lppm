@@ -1,0 +1,374 @@
+/* Interaction and layout refinements shared by light and dark themes. */
+.workspace-content {
+    max-width: 1600px;
+    margin-inline: auto;
+    width: 100%;
+    padding: 32px;
+}
+.page-heading {
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+.page-heading h1 {
+    font-size: clamp(24px, 2.5vw, 32px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.page-heading p {
+    margin-top: 8px;
+    max-width: 72ch;
+}
+.panel {
+    padding: 24px;
+}
+.panel-heading {
+    margin-bottom: 20px;
+}
+.panel-heading p {
+    margin-top: 6px;
+}
+.dashboard-stats {
+    margin-bottom: 24px;
+}
+.dashboard-charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.chart-panel {
+    min-width: 0;
+    margin-bottom: 0;
+}
+.chart-period {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+.chart-scroll {
+    overflow-x: auto;
+}
+.year-chart {
+    display: block;
+    width: 100%;
+    min-width: 460px;
+}
+.chart-gridline {
+    stroke: var(--line);
+}
+.chart-bar {
+    fill: var(--blue);
+}
+.chart-value {
+    fill: var(--ink);
+    font-size: 16px;
+    font-weight: 600;
+}
+.chart-label {
+    fill: var(--muted);
+    font-size: 15px;
+}
+.chart-data {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+}
+.chart-data table {
+    margin-top: 12px;
+}
+.collection-bars {
+    display: grid;
+    gap: 24px;
+    margin-top: 28px;
+}
+.collection-bar > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.collection-bar small {
+    color: var(--muted);
+    font-weight: 400;
+    padding-left: 8px;
+}
+.collection-bar progress {
+    display: block;
+    width: 100%;
+    height: 8px;
+    border: 0;
+    border-radius: 3px;
+    background: var(--line);
+    accent-color: var(--blue);
+}
+.collection-bar progress::-webkit-progress-bar {
+    background: var(--line);
+    border-radius: 3px;
+}
+.collection-bar progress::-webkit-progress-value {
+    background: var(--blue);
+    border-radius: 3px;
+}
+.collection-bar progress::-moz-progress-bar {
+    background: var(--blue);
+}
+.collection-bar:nth-child(2) progress::-webkit-progress-value {
+    background: var(--teal);
+}
+.collection-bar:nth-child(3) progress::-webkit-progress-value {
+    background: var(--amber);
+}
+.workflow-overview {
+    padding: 24px;
+    margin-bottom: 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+}
+.workflow-overview > p {
+    margin-top: 6px;
+    max-width: 80ch;
+}
+.workflow-steps {
+    list-style: none;
+    display: flex;
+    gap: 16px;
+    padding: 0;
+    margin: 0 0 24px;
+}
+.workflow-steps li {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+}
+.workflow-steps li span {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+}
+.workflow-steps .is-complete span {
+    color: var(--blue);
+    background: var(--blue-soft);
+    border-color: transparent;
+}
+.workflow-steps .is-current {
+    color: var(--ink);
+    font-weight: 650;
+}
+.workflow-steps .is-current span {
+    color: var(--on-accent);
+    background: var(--blue);
+    border-color: transparent;
+}
+.workflow-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+    margin-top: 20px;
+}
+.workflow-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 100%;
+}
+.workflow-form label {
+    font-size: 12px;
+    font-weight: 600;
+}
+.workflow-form textarea {
+    width: 100%;
+    min-width: 0;
+}
+.detail-admin-grid {
+    gap: 24px;
+    margin-top: 24px;
+}
+.detail-admin-grid > *,
+.work-heading,
+.form-field {
+    min-width: 0;
+}
+.detail-admin-grid .panel + .panel {
+    margin-top: 24px;
+}
+.document-block + .document-block {
+    margin-top: 20px;
+}
+.document-link strong {
+    overflow-wrap: anywhere;
+}
+.compact-form {
+    margin-top: 16px;
+    display: grid;
+    gap: 12px;
+}
+.compact-form .helper {
+    margin: 0;
+}
+.form-grid {
+    gap: 20px 24px;
+}
+.form-field > label {
+    margin-bottom: 8px;
+}
+.form-field [aria-invalid="true"] {
+    border-color: #c24157;
+}
+.form-field > .text-danger {
+    margin-top: 6px;
+}
+.notice {
+    margin-bottom: 20px;
+    overflow-wrap: anywhere;
+}
+.notice p {
+    color: inherit;
+    margin-top: 6px;
+}
+.notice ul {
+    margin: 12px 0 0;
+    padding-left: 20px;
+}
+.notice li + li {
+    margin-top: 6px;
+}
+.notice a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.notice-dismissible {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.notice-dismissible .icon-button {
+    color: inherit;
+    font-size: 22px;
+}
+.submit-status {
+    margin-top: 10px;
+}
+[aria-busy="true"] button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+.swal2-popup.repository-alert {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    width: min(460px, calc(100vw - 32px));
+    font-family: inherit;
+}
+.repository-alert .swal2-title {
+    color: var(--ink);
+    padding: 0;
+    font-size: 22px;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+}
+.repository-alert .swal2-html-container {
+    color: var(--muted);
+    margin: 12px 0 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.7;
+}
+.repository-alert .confirmation-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 24px;
+}
+.repository-alert .confirmation-actions .button {
+    margin: 0;
+}
+.error-page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: var(--surface);
+}
+.error-card {
+    max-width: 600px;
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 36px;
+}
+.error-code {
+    font-size: 44px;
+    color: var(--blue);
+    margin: 24px 0 8px;
+}
+.error-card h1 {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 24px 0;
+}
+@media (max-width: 1100px) {
+    .dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 700px) {
+    .workspace-content {
+        padding: 24px 16px;
+    }
+    .panel,
+    .workflow-overview {
+        padding: 20px 16px;
+    }
+    .dashboard-charts,
+    .detail-admin-grid {
+        gap: 16px;
+    }
+    .page-heading {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .workflow-steps {
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .workflow-steps li {
+        flex: 1 1 120px;
+    }
+    .workflow-form {
+        width: 100%;
+    }
+    .repository-alert .confirmation-actions {
+        flex-direction: column;
+    }
+    .repository-alert .confirmation-actions .button {
+        width: 100%;
+    }
+    .error-card {
+        padding: 24px;
+    }
+}
+
+/* Keep confirmation immediate, including reduced-motion browsers. */
+.swal2-popup.repository-alert {
+    animation: none !important;
+    transition: none !important;
+}

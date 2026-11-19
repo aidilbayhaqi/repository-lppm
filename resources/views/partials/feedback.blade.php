@@ -26,9 +26,14 @@
 @endif
 @php
     // Error data in a child Blade view must not override Laravel's validation bag.
+    // Prefer Laravel's shared validation bag, but recover flashed errors
+    // when a child template supplied an empty or invalid $errors value.
     $feedbackErrors = ($errors ?? null) instanceof \Illuminate\Support\ViewErrorBag
         ? $errors
-        : session('errors');
+        : null;
+    if (! $feedbackErrors?->any()) {
+        $feedbackErrors = session('errors');
+    }
 @endphp
 @if($feedbackErrors instanceof \Illuminate\Support\ViewErrorBag && $feedbackErrors->any())
     <div id="form-errors" role="alert" tabindex="-1" class="notice notice-error" data-error-summary>

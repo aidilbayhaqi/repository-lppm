@@ -16,9 +16,10 @@ class HealthController extends Controller
             DB::select('select 1');
             Cache::get('repository:readiness');
             $disk = config('repository.documents_disk');
+            $storage = Storage::disk($disk);
             $ready = config('filesystems.disks.'.$disk.'.driver') !== 'local'
-                ? Storage::disk($disk)->directoryExists('documents')
-                : is_writable(config('filesystems.disks.'.$disk.'.root'));
+                ? $storage->directoryExists('documents')
+                : is_writable($storage->path(''));
 
             return response()->json(['status' => $ready ? 'ok' : 'unavailable'], $ready ? 200 : 503)->header('Cache-Control', 'no-store');
         } catch (Throwable $exception) {

@@ -128,7 +128,7 @@ class AccessControlTest extends TestCase
         $work->penulis()->attach(Penulis::factory()->create(), ['urutan_penulis' => 1]);
 
         $this->actingAs($verifier)->post(route('admin.works.workflow', ['publikasi', $work->id]), [
-            'action' => 'approve', 'lock_version' => $work->lock_version,
+            'action' => 'approve', 'lock_version' => $work->fresh()->lock_version,
         ])->assertSessionHasNoErrors()->assertRedirect(route('admin.works.index', 'publikasi'));
 
         $this->assertSame('verified', $work->fresh()->repository_status);
@@ -142,7 +142,7 @@ class AccessControlTest extends TestCase
 
         $this->actingAs($reviewer)->get(route('admin.works.show', ['publikasi', $work->id]))->assertForbidden();
         $this->post(route('admin.works.workflow', ['publikasi', $work->id]), [
-            'action' => 'approve', 'lock_version' => $work->lock_version,
+            'action' => 'approve', 'lock_version' => $work->fresh()->lock_version,
         ])->assertForbidden();
         $this->get(route('admin.users.index'))->assertForbidden();
     }

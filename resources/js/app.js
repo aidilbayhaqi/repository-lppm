@@ -1,6 +1,7 @@
 
 
 import './theme';
+import './register';
 import { enhanceLookups } from './lookups';
 import './dialogs';
 import './feedback';

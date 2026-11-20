@@ -76,11 +76,22 @@ class AccessControlTest extends TestCase
 
     public function test_registration_cannot_inject_admin_role_or_disable_account(): void
     {
-        $this->post('/register', ['nama' => 'New Student', 'email' => 'student@example.test', 'password' => 'LongPassword123!', 'password_confirmation' => 'LongPassword123!', 'role' => 'admin', 'is_active' => false])->assertRedirect('/dashboard');
+        $this->post('/register', [
+            'nama' => 'New Student',
+            'email' => 'student@example.test',
+            'password' => 'LongPassword123!',
+            'password_confirmation' => 'LongPassword123!',
+            'requested_role' => 'mahasiswa',
+            'identifier' => '20260002',
+            'role' => 'admin',
+            'is_active' => true,
+        ])->assertRedirect(route('login'));
         $user = User::where('email', 'student@example.test')->firstOrFail();
         $this->assertSame('mahasiswa', $user->role);
-        $this->assertTrue($user->is_active);
+        $this->assertFalse($user->is_active);
+        $this->assertSame('pending', $user->registrationRequest->status);
         $this->assertNull($user->penulis);
+        $this->assertGuest();
     }
 
     public function test_inactive_users_cannot_login_even_with_correct_password(): void

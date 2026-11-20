@@ -166,4 +166,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Penulis::class);
     }
+
+    public function registrationRequest(): HasOne
+    {
+        return $this->hasOne(RegistrationRequest::class);
+    }
 }

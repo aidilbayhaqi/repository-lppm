@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\ReferenceController;
+use App\Http\Controllers\Admin\RegistrationApprovalController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WorkController;
 use App\Http\Controllers\Admin\WorkflowController;
@@ -68,6 +69,12 @@ Route::middleware(array_filter(['auth', 'active', 'throttle:mutations', config('
             Route::post('/import/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('import.preview');
             Route::get('/import/{batch}', [ImportController::class, 'show'])->name('import.show');
             Route::post('/import/{batch}/commit', [ImportController::class, 'commit'])->name('import.commit');
+        });
+        Route::middleware(['can:manage-users', 'password.confirm'])->prefix('registrations')->name('registrations.')->group(function () {
+            Route::get('/', [RegistrationApprovalController::class, 'index'])->name('index');
+            Route::get('/{registration}', [RegistrationApprovalController::class, 'show'])->name('show');
+            Route::post('/{registration}/approve', [RegistrationApprovalController::class, 'approve'])->name('approve')->middleware('throttle:20,1');
+            Route::post('/{registration}/reject', [RegistrationApprovalController::class, 'reject'])->name('reject')->middleware('throttle:20,1');
         });
         Route::resource('users', UserController::class)->except(['show', 'destroy'])->middleware(['can:manage-users', 'password.confirm']);
     });

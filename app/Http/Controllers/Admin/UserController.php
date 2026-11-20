@@ -60,6 +60,9 @@ class UserController extends Controller
             Gate::forUser($request->user()->fresh())->authorize('manage-users');
             $user = $id ? User::lockForUpdate()->findOrFail($id) : new User;
             $data = $request->validated();
+            if ($id && $user->registrationRequest && $user->registrationRequest->status !== 'approved') {
+                throw ValidationException::withMessages(['role' => 'Pendaftaran belum disetujui. Gunakan halaman Persetujuan akun.']);
+            }
             if ($id) {
                 OptimisticLock::check($user, (int) $data['lock_version']);
             }

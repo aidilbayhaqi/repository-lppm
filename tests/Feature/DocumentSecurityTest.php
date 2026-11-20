@@ -106,7 +106,7 @@ class DocumentSecurityTest extends TestCase
         config(['repository.require_verified_email' => true]);
         $this->actingAs($owner)->get(route('documents.download', $document))->assertNotFound();
         $this->get(route('works.cover.show', ['publikasi', $work->id]))->assertNotFound();
-        $this->get(route('admin.documents.version', $version))->assertRedirect(route('verification.notice'));
+        $this->get(route('admin.documents.version', $version))->assertForbidden();
 
         $owner->forceFill(['email_verified_at' => now()])->save();
         $this->actingAs($owner)->get(route('documents.download', $document))->assertOk();

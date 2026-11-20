@@ -68,11 +68,10 @@
                             @error('identifier') <p class="mt-1 text-xs text-danger">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="form-field" data-program-field
-                            @if (old('requested_role') !== 'dosen' && ! $errors->has('program_studi_id')) hidden @endif>
+                        <div class="form-field" data-program-field>
                             <label for="program_studi_id" class="mb-2 block text-sm font-medium">Program studi <span aria-hidden="true" class="text-red-600">*</span></label>
                             <select class="w-full" name="program_studi_id" id="program_studi_id"
-                                @if (old('requested_role') !== 'dosen') disabled @else required @endif
+                                @if (old('requested_role') === 'dosen') required @endif
                                 @error('program_studi_id') aria-invalid="true" @enderror>
                                 <option value="">Pilih program studi aktif</option>
                                 @foreach ($programs as $program)

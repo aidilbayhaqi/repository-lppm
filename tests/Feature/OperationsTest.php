@@ -120,6 +120,10 @@ class OperationsTest extends TestCase
 
     public function test_health_check_returns_only_safe_status(): void
     {
+        // A container test must not depend on the local document volume
+        // already existing or being writable in the image.
+        Storage::fake(config('repository.documents_disk'));
+
         $this->get('/health')->assertOk()->assertExactJson(['status' => 'ok']);
     }
 }

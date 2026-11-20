@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY resources resources
-COPY vite.config.js tailwind.config.js postcss.config.js ./
+COPY vite.config.js tailwind.config.js ./
 RUN npm run build
 
 FROM php:8.4-fpm-bookworm AS php-base

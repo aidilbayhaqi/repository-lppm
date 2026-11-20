@@ -30,12 +30,22 @@ class ImportFeedbackRegressionTest extends TestCase
         $errors = new ViewErrorBag();
         $errors->put('default', new MessageBag(['file' => ['Berkas perlu diperiksa kembali.']]));
 
+        // The HTTP preview is already covered above. Render the real Blade page
+        // with an explicit validation bag to test that both error sources coexist,
+        // without depending on session-flash timing in a synthetic GET request.
         $this->actingAs($user)
-            ->withSession(['errors' => $errors])
             ->get(route('admin.import.show', $batch))
             ->assertOk()
-            ->assertSee('Perbaiki baris berikut')
-            ->assertSee('Berkas perlu diperiksa kembali.');
+            ->assertSee('Perbaiki baris berikut');
+
+        $authorNames = Penulis::whereIn('id', collect($batch->rows)
+            ->flatMap(fn ($row) => array_column($row['data']['authors'], 'id'))
+            ->unique())->pluck('nama', 'id');
+
+        $html = view('admin.import.show', compact('batch', 'authorNames', 'errors'))->render();
+
+        $this->assertStringContainsString('Perbaiki baris berikut', $html);
+        $this->assertStringContainsString('Berkas perlu diperiksa kembali.', $html);
     }
 
     private function invalidBatch(): array

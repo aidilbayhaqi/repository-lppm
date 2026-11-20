@@ -23,6 +23,14 @@ class WorkflowController extends Controller
             $request->validated()
         );
 
+        // Verifiers lose access when an item leaves the verification queue.
+        // Redirect to their filtered list instead of a newly forbidden detail page.
+        if ($request->user()->hasRole('verifier')
+            && in_array($request->validated('action'), ['approve', 'revision', 'reject'], true)) {
+            return redirect()->route('admin.works.index', $type)
+                ->with('success', 'Status karya berhasil diperbarui.');
+        }
+
         $redirect = redirect()->route(
             'admin.works.show',
             [$type, $id]

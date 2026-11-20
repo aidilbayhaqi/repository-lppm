@@ -77,6 +77,13 @@ HTML dan respons authenticated memakai private/no-store. Hanya asset fingerprint
 
 Log production berisi request ID, user ID, nama route, metode, status, dan durasi. Login gagal mencatat hash email serta IP. Tidak mencatat request body, query string reset, password, session token, atau isi dokumen. Terapkan retensi dan pembatasan akses log.
 
+## Hardening akses privat dan antrean Verifier (Security Sprint 1)
+
+- Pemeriksaan **email terverifikasi** kini dilakukan di `WorkPolicy::view` ketika `REQUIRE_VERIFIED_EMAIL=true`. Semua akses privat berbasis policy, termasuk endpoint unduh PDF langsung, versi PDF, dan cover privat, mengikuti aturan yang sama. File publik tetap dapat diunduh tanpa akun jika karya berstatus publik, dokumen ditandai publik, dan persyaratan scan terpenuhi.
+- Verifier tidak lagi menerima akses baca global untuk seluruh publikasi. Akses antrean dibatasi ke publikasi **tidak diarsipkan** dengan status `submitted` atau `pending_verification`. Pengecualian terhadap karya yang memang dibuat/ditulis user tetap memakai aturan kepemilikan normal; verifier tetap tidak bisa mengubah metadata. Setelah `approve`, `revision`, atau `reject`, verifier diarahkan ke daftar antrean karena akses detail karya selesai sudah ditutup.
+- Penerapan **assignment verifier individual** belum ada: semua verifier yang aktif dan terverifikasi masih bisa memeriksa antrean bersama. Perlu desain penugasan jika pemeriksaan wajib dibatasi per orang. Reviewer tetap role berbeda tanpa izin verifikasi.
+- Tambah regresi: akses PDF, versi dan cover privat oleh pemilik email belum diverifikasi, pengecualian PDF/cover publik, larangan akses draft dengan ID berbeda, daftar antrean Verifier, dan larangan mutasi Reviewer. Uji ulang pada MySQL dan staging sebelum produksi.
+
 ## Kontrol operasional dan batas rilis
 
 TLS, firewall, patch server, backup terenkripsi, restore test, monitoring, dan pengelolaan secret tetap tanggung jawab deployment. MFA/SSO admin **belum diimplementasikan**; bila diwajibkan institusi, pasang identity gateway atau implementasikan MFA sebelum membuka panel admin ke internet. Tidak ada crawler URL pengguna, sehingga jangan menambahkan fetch URL tanpa pertahanan SSRF. Review penetrasi independen dan pemeriksaan kepatuhan institusi belum dilakukan.

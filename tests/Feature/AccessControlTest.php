@@ -87,6 +87,66 @@ class AccessControlTest extends TestCase
         $this->get(route('admin.works.edit', ['publikasi', $work->id]))->assertForbidden();
     }
 
+    public function test_verifier_only_views_active_verification_queue_and_owned_work(): void
+    {
+        $verifier = User::factory()->create(['role' => 'verifier']);
+        $draft = Publikasi::factory()->draft()->create(['judul' => 'Rahasia Draft Tertutup', 'public_visibility' => 'private']);
+        $submitted = Publikasi::factory()->draft()->create(['judul' => 'Antrean Diajukan', 'repository_status' => 'submitted']);
+        $pending = Publikasi::factory()->draft()->create(['judul' => 'Antrean Pemeriksaan', 'repository_status' => 'pending_verification']);
+        $finished = Publikasi::factory()->draft()->create(['judul' => 'Hasil Pemeriksaan Selesai', 'repository_status' => 'verified']);
+        $archived = Publikasi::factory()->draft()->create(['judul' => 'Arsip Tertutup', 'repository_status' => 'submitted', 'archived_at' => now()]);
+        $mine = Publikasi::factory()->draft()->create(['judul' => 'Arsip Draft Sendiri', 'created_by' => $verifier->id]);
+
+        $this->actingAs($verifier);
+        $this->get(route('admin.works.show', ['publikasi', $draft->id]))->assertForbidden();
+        $this->get(route('admin.works.show', ['publikasi', $submitted->id]))->assertOk();
+        $this->get(route('admin.works.show', ['publikasi', $pending->id]))->assertOk();
+        $this->get(route('admin.works.show', ['publikasi', $finished->id]))->assertForbidden();
+        $this->get(route('admin.works.show', ['publikasi', $archived->id]))->assertForbidden();
+        $this->get(route('admin.works.show', ['publikasi', $mine->id]))->assertOk();
+        $this->get(route('admin.works.edit', ['publikasi', $mine->id]))->assertForbidden();
+        $this->get(route('admin.works.index', 'publikasi'))
+            ->assertOk()
+            ->assertSee('Antrean Diajukan')
+            ->assertSee('Antrean Pemeriksaan')
+            ->assertSee('Arsip Draft Sendiri')
+            ->assertDontSee('Rahasia Draft Tertutup')
+            ->assertDontSee('Hasil Pemeriksaan Selesai')
+            ->assertDontSee('Arsip Tertutup');
+        $this->get(route('admin.dashboard'))->assertOk()->assertDontSee('Rahasia Draft Tertutup');
+    }
+
+    public function test_verifier_returns_to_queue_after_approving_a_publication(): void
+    {
+        $owner = User::factory()->create(['role' => 'mahasiswa']);
+        $verifier = User::factory()->create(['role' => 'verifier']);
+        $work = Publikasi::factory()->draft()->create([
+            'created_by' => $owner->id,
+            'repository_status' => 'pending_verification',
+            'tahun_publikasi' => 2026,
+        ]);
+        $work->penulis()->attach(Penulis::factory()->create(), ['urutan_penulis' => 1]);
+
+        $this->actingAs($verifier)->post(route('admin.works.workflow', ['publikasi', $work->id]), [
+            'action' => 'approve', 'lock_version' => $work->lock_version,
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.works.index', 'publikasi'));
+
+        $this->assertSame('verified', $work->fresh()->repository_status);
+        $this->get(route('admin.works.show', ['publikasi', $work->id]))->assertForbidden();
+    }
+
+    public function test_reviewer_still_cannot_access_unassigned_publication_or_mutate_workflow(): void
+    {
+        $reviewer = User::factory()->create(['role' => 'reviewer']);
+        $work = Publikasi::factory()->draft()->create(['repository_status' => 'pending_verification']);
+
+        $this->actingAs($reviewer)->get(route('admin.works.show', ['publikasi', $work->id]))->assertForbidden();
+        $this->post(route('admin.works.workflow', ['publikasi', $work->id]), [
+            'action' => 'approve', 'lock_version' => $work->lock_version,
+        ])->assertForbidden();
+        $this->get(route('admin.users.index'))->assertForbidden();
+    }
+
     public function test_registration_cannot_inject_admin_role_or_disable_account(): void
     {
         $this->post('/register', [

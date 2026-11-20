@@ -17,8 +17,20 @@ class SearchService
         $authors = $type === 'hki' ? 'pencipta' : 'penulis';
         if (! $actor) {
             $query->published();
-        } elseif (! $actor->isStaff() && ! ($actor->role === 'verifier' && $type === 'publikasi')) {
-            $query->where(fn ($q) => $q->where('created_by', $actor->id)->orWhereHas($authors, fn ($a) => $a->where('penulis.user_id', $actor->id)));
+        } elseif (config('repository.require_verified_email') && ! $actor->hasVerifiedEmail()) {
+            // Match WorkPolicy::view even for callers outside the verified route group.
+            $query->whereRaw('1 = 0');
+        } elseif (! $actor->isStaff()) {
+            $query->where(function ($visible) use ($actor, $authors, $type) {
+                $visible->where('created_by', $actor->id)
+                    ->orWhereHas($authors, fn ($a) => $a->where('penulis.user_id', $actor->id));
+
+                if ($actor->hasRole('verifier') && $type === 'publikasi') {
+                    $visible->orWhere(fn ($queue) => $queue
+                        ->whereNull('archived_at')
+                        ->whereIn('repository_status', ['submitted', 'pending_verification']));
+                }
+            });
         }
         if (filled($filters['q'] ?? null)) {
             $term = '%'.$filters['q'].'%';

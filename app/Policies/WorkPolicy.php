@@ -26,7 +26,23 @@ class WorkPolicy
 
     public function view(User $user, Model $work): bool
     {
-        return $user->isStaff() || ($user->role === 'verifier' && $work instanceof Publikasi) || $work->created_by === $user->id || $work->{WorkType::authors($work)}()->where('penulis.user_id', $user->id)->exists();
+        // Public works have separate public routes. Private work metadata and files
+        // must never bypass the verified-email requirement through a direct URL.
+        if (config('repository.require_verified_email') && ! $user->hasVerifiedEmail()) {
+            return false;
+        }
+
+        if ($user->isStaff() || $work->created_by === $user->id
+            || $work->{WorkType::authors($work)}()->where('penulis.user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        // Until individual assignments exist, verifiers may only inspect the
+        // active verification queue (not drafts, archives, or completed works).
+        return $user->hasRole('verifier')
+            && $work instanceof Publikasi
+            && ! $work->archived_at
+            && in_array($work->repository_status, ['submitted', 'pending_verification'], true);
     }
 
     public function owner(User $user, Model $work): bool

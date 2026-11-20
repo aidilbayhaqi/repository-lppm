@@ -32,6 +32,7 @@
                     'admin' => 'Admin LPPM',
                     'operator' => 'Operator',
                     'verifier' => 'Verifier',
+                    'reviewer' => 'Reviewer',
                     'dosen' => 'Dosen',
                     'mahasiswa' => 'Mahasiswa',
                     'peneliti_eksternal' => 'Peneliti eksternal',

@@ -40,13 +40,7 @@ class RegistrationApprovalController extends Controller
                 ->with('fakultas:id,nama_fakultas')
                 ->orderBy('nama')
                 ->get(['id', 'nama', 'fakultas_id']),
-            'assignableRoles' => [
-                'mahasiswa' => 'Mahasiswa',
-                'dosen' => 'Dosen',
-                'peneliti_eksternal' => 'Penulis eksternal',
-                'operator' => 'Operator',
-                'verifier' => 'Verifier',
-            ],
+            'assignableRoles' => RegistrationApprovalService::ROLE_LABELS,
         ]);
     }
 

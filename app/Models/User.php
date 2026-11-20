@@ -34,6 +34,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public const ROLE_VERIFIER = 'verifier';
 
+    public const ROLE_REVIEWER = 'reviewer';
+
     public const ROLE_ADMIN = 'admin';
 
     public const ROLE_OPERATOR = 'operator';
@@ -108,6 +110,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isOperator(): bool
     {
         return $this->role === self::ROLE_OPERATOR;
+    }
+
+    public function isReviewer(): bool
+    {
+        return $this->role === self::ROLE_REVIEWER;
     }
 
     public function isDosen(): bool

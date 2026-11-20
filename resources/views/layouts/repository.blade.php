@@ -61,6 +61,9 @@
                         </details>
                     @endcan
                     @can('manage-users')
+                        <a @class(['nav-link', 'active' => request()->routeIs('admin.registrations.*')])
+                            @if (request()->routeIs('admin.registrations.*')) aria-current="page" @endif
+                            href="{{ route('admin.registrations.index') }}"><x-icon name="users" />Persetujuan akun</a>
                         <a @class(['nav-link', 'active' => request()->routeIs('admin.users.*')]) @if (request()->routeIs('admin.users.*')) aria-current="page" @endif
                             href="{{ route('admin.users.index') }}"><x-icon name="users" />Pengguna & akses</a>
                     @endcan

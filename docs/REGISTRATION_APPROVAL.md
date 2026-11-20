@@ -6,9 +6,11 @@
 2. Mengisi nama, email, password, kategori mahasiswa/dosen/penulis eksternal, NIM/NIDN/identitas (sesuai kategori), dan Prodi aktif untuk dosen.
 3. Server membuat `users.is_active=false` dan `registration_requests.status=pending`. Pendaftar **tidak** otomatis login dan **tidak** menerima role dari field `role` pada request.
 4. Superadmin (role lama `admin`) membuka **Pengguna & akses → Persetujuan akun**. Password confirmation diperlukan.
-5. Superadmin memeriksa identitas, dapat menetapkan mahasiswa/dosen/peneliti eksternal/operator/verifier, atau menolak disertai alasan. Role `admin` tidak tersedia lewat approval.
+5. Superadmin memeriksa identitas, dapat menetapkan mahasiswa/dosen/peneliti eksternal/operator/verifier/reviewer, atau menolak disertai alasan. Role `admin` tidak tersedia lewat approval.
 6. Approval adalah transaksi: link/buat referensi `penulis`; untuk dosen juga `dosen` dengan `program_studi_id` dari referensi aktif; aktifkan user; tulis audit. Rejection mempertahankan akun nonaktif.
 7. Setelah approval, event `Registered` memicu email verifikasi. Pada environment yang menetapkan `REQUIRE_VERIFIED_EMAIL=true`, pengguna harus memverifikasi alamat sebelum memakai ruang kerja.
+
+Reviewer merupakan peran terpisah dari Verifier. Pada tahap ini Reviewer memiliki akses baca terbatas atas karya terkait akun, tanpa hak memverifikasi/menerbitkan atau mengelola pengguna; workflow peer review formal memerlukan desain penugasan dan keputusan tersendiri.
 
 ## Batas otorisasi
 
@@ -31,14 +33,14 @@
 
 ## Acceptance checks
 
-- Register mahasiswa, dosen (dengan Prodi aktif), dan penulis eksternal.
+- Register mahasiswa, dosen (dengan Prodi aktif), penulis eksternal, operator, verifier, dan reviewer (tetap menunggu approval).
 - Pending tidak bisa login dan tidak mempunyai referensi auto-create.
 - Superadmin bisa approve/reject, tetapi tidak bisa memberi role admin melalui approval.
 - Persetujuan akademik menghasilkan referensi sesuai kategori; perubahan fakultas/prodi tetap melalui referensi.
 - Penolakan membutuhkan alasan dan tidak bisa diproses ulang.
 - Referensi terkait akun lain tidak boleh diambil.
 - Email verification dikirim setelah approval; Mailpit digunakan untuk pengujian lokal.
-- Akses admin/approval ditolak untuk operator/verifier/dosen/mahasiswa/guest.
+- Akses admin/approval ditolak untuk operator/verifier/reviewer/dosen/mahasiswa/guest.
 
 ## Catatan
 

@@ -17,7 +17,7 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $this->get('/register')->assertOk()->assertSee('Daftar akun repositori');
+        $this->get('/register')->assertOk()->assertSee('Buat akun repositori');
     }
 
     public function test_new_users_are_inactive_and_cannot_login_before_approval(): void

@@ -21,7 +21,7 @@ class WorkPolicy
 
     public function create(User $user): bool
     {
-        return $user->role !== 'verifier';
+        return $user->hasRole('admin', 'operator', 'dosen', 'mahasiswa', 'peneliti_eksternal');
     }
 
     public function view(User $user, Model $work): bool
@@ -45,7 +45,7 @@ class WorkPolicy
 
     public function update(User $user, Model $work): bool
     {
-        return $user->role !== 'verifier' && $this->owner($user, $work) && WorkType::editable($work);
+        return ! $user->hasRole('verifier', 'reviewer') && $this->owner($user, $work) && WorkType::editable($work);
     }
 
     public function delete(User $user, Model $work): bool

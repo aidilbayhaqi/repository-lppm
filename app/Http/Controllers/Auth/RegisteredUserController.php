@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProgramStudi;
 use App\Models\RegistrationRequest;
 use App\Models\User;
+use App\Services\RegistrationApprovalService;
 use App\Support\PasswordPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class RegisteredUserController extends Controller
         abort_unless(config('repository.registration_enabled'), 404);
 
         return view('auth.register', [
+            'roleOptions' => RegistrationApprovalService::ROLE_LABELS,
             'programs' => ProgramStudi::query()
                 ->where('aktif', true)
                 ->whereHas('fakultas', fn ($q) => $q->where('aktif', true))
@@ -38,7 +40,7 @@ class RegisteredUserController extends Controller
             'nama' => ['required', 'string', 'max:150'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => ['required', 'confirmed', ...PasswordPolicy::rules()],
-            'requested_role' => ['required', Rule::in(['mahasiswa', 'dosen', 'peneliti_eksternal'])],
+            'requested_role' => ['required', Rule::in(RegistrationApprovalService::ASSIGNABLE_ROLES)],
             'identifier' => ['nullable', 'string', 'max:100',
                 Rule::requiredIf(fn () => in_array($request->input('requested_role'), ['dosen', 'mahasiswa'], true))],
             'program_studi_id' => [

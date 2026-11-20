@@ -20,7 +20,10 @@
             class="arrow-link" href="{{ route('home') }}">Kembali ke repositori<x-icon name="arrow-up-right"
                 size="17" /></a></header>
     <main id="main" class="auth-main" tabindex="-1">
-        <div class="auth-card">{{ $slot }}</div>
+        <div @class([
+            'auth-card' => ! request()->routeIs('register'),
+            'mx-auto w-full max-w-6xl' => request()->routeIs('register'),
+        ])>{{ $slot }}</div>
     </main>
     <footer class="auth-footer">© {{ date('Y') }} LPPM Universitas Mitra Bangsa</footer>
 </body>

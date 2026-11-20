@@ -15,7 +15,16 @@ use Illuminate\Validation\ValidationException;
 final class RegistrationApprovalService
 {
     public const ASSIGNABLE_ROLES = [
-        'mahasiswa', 'dosen', 'peneliti_eksternal', 'operator', 'verifier',
+        'mahasiswa', 'dosen', 'peneliti_eksternal', 'operator', 'verifier', 'reviewer',
+    ];
+
+    public const ROLE_LABELS = [
+        'mahasiswa' => 'Mahasiswa',
+        'dosen' => 'Dosen',
+        'peneliti_eksternal' => 'Penulis / peneliti eksternal',
+        'operator' => 'Operator LPPM',
+        'verifier' => 'Verifier publikasi',
+        'reviewer' => 'Reviewer',
     ];
 
     public function approve(RegistrationRequest $request, User $actor, array $input): void
@@ -135,7 +144,6 @@ final class RegistrationApprovalService
 
             $approval->update([
                 'status' => 'approved',
-                'requested_role' => $role,
                 'identifier' => $identifier ?: null,
                 'program_studi_id' => $role === 'dosen' ? $programId : null,
                 'reviewed_by' => $actor->id,
@@ -147,6 +155,7 @@ final class RegistrationApprovalService
                 'status' => 'pending',
             ], [
                 'status' => 'approved',
+                'requested_role' => $approval->requested_role,
                 'role' => $role,
             ]);
 

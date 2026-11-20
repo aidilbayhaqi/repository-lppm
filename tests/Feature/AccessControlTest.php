@@ -24,7 +24,7 @@ class AccessControlTest extends TestCase
 
     public static function roles(): array
     {
-        return [['admin', true, true, true], ['operator', true, false, false], ['verifier', false, false, true], ['dosen', false, false, false], ['mahasiswa', false, false, false], ['peneliti_eksternal', false, false, false]];
+        return [['admin', true, true, true], ['operator', true, false, false], ['verifier', false, false, true], ['reviewer', false, false, false], ['dosen', false, false, false], ['mahasiswa', false, false, false], ['peneliti_eksternal', false, false, false]];
     }
 
     #[DataProvider('roles')]
@@ -37,6 +37,19 @@ class AccessControlTest extends TestCase
         $this->assertSame($verify, Gate::forUser($user)->allows('verify', $work));
         $this->assertFalse(Gate::forUser($user)->allows('update', $work));
         $this->assertFalse(Gate::forUser($user)->allows('publish', $work));
+    }
+
+
+    public function test_reviewer_is_read_only_and_cannot_manage_accounts_or_verify_publications(): void
+    {
+        $reviewer = User::factory()->create(['role' => 'reviewer']);
+        $work = Publikasi::factory()->draft()->create(['created_by' => $reviewer->id, 'repository_status' => 'pending_verification']);
+
+        $this->actingAs($reviewer)->get(route('admin.works.show', ['publikasi', $work->id]))->assertOk();
+        $this->get(route('admin.works.create', ['publikasi']))->assertForbidden();
+        $this->get(route('admin.works.edit', ['publikasi', $work->id]))->assertForbidden();
+        $this->get(route('admin.users.index'))->assertForbidden();
+        $this->assertFalse(Gate::forUser($reviewer)->allows('verify', $work));
     }
 
     public function test_guest_contributor_and_inactive_account_boundaries(): void

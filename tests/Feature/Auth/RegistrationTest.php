@@ -17,7 +17,7 @@ class RegistrationTest extends TestCase
 
     public function test_registration_screen_can_be_rendered(): void
     {
-        $this->get('/register')->assertOk()->assertSee('Daftar akun repositori');
+        $this->get('/register')->assertOk()->assertSee('Buat akun repositori');
     }
 
     public function test_new_users_are_inactive_and_cannot_login_before_approval(): void
@@ -159,6 +159,59 @@ class RegistrationTest extends TestCase
 
         $this->assertSame('pending', $registration->fresh()->status);
         $this->assertFalse($registration->user->fresh()->is_active);
+    }
+
+
+    public function test_registration_shows_two_cards_and_staff_role_requests(): void
+    {
+        $this->get('/register')
+            ->assertOk()
+            ->assertSee('registration-identity-title')
+            ->assertSee('registration-security-title')
+            ->assertSee('value="reviewer"', false)
+            ->assertSee('value="verifier"', false)
+            ->assertDontSee('value="admin"', false);
+    }
+
+    public function test_reviewers_can_request_access_but_require_superadmin_approval(): void
+    {
+        $this->post('/register', $this->payload([
+            'requested_role' => 'reviewer',
+            'identifier' => null,
+        ]))->assertRedirect(route('login'));
+
+        $registration = RegistrationRequest::firstOrFail();
+        $user = $registration->user;
+        $this->assertSame('reviewer', $registration->requested_role);
+        $this->assertFalse($user->is_active);
+        $this->assertGuest();
+
+        $admin = User::factory()->admin()->create();
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => now()->timestamp])
+            ->post(route('admin.registrations.approve', $registration), [
+                'role' => 'reviewer',
+                'identifier' => null,
+            ])->assertSessionHasNoErrors();
+
+        $this->assertSame('reviewer', $user->fresh()->role);
+        $this->assertTrue($user->fresh()->is_active);
+        $this->assertSame('approved', $registration->fresh()->status);
+        $this->assertSame('reviewer', $registration->fresh()->requested_role);
+    }
+
+    public function test_staff_role_request_cannot_activate_account_using_injected_fields(): void
+    {
+        $this->post('/register', $this->payload([
+            'requested_role' => 'verifier',
+            'identifier' => null,
+            'role' => 'admin',
+            'is_active' => 1,
+        ]))->assertRedirect(route('login'));
+
+        $registration = RegistrationRequest::firstOrFail();
+        $this->assertSame('verifier', $registration->requested_role);
+        $this->assertFalse($registration->user->is_active);
+        $this->assertNotSame('admin', $registration->user->role);
     }
 
     private function payload(array $override = []): array

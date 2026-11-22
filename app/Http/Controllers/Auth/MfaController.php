@@ -132,6 +132,8 @@ class MfaController extends Controller
 
     public function disable(Request $request, Totp $totp): RedirectResponse
     {
+        // Privileged accounts cannot bypass a mandatory second factor by disabling it.
+        abort_if($request->user()->requiresMfa(), 403);
         $data = $request->validate([
             'current_password' => ['required', 'string'],
             'code' => ['required', 'string', 'max:64'],

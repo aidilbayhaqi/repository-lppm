@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { auditEntries, auditDockerIgnore, auditTrackedFiles, classifyPath } from '../../tools/release-safety.mjs';
+import { auditEntries, auditDockerIgnore, auditTrackedFiles, auditWorkflowActionPins, classifyPath } from '../../tools/release-safety.mjs';
 
 const forbidden = [
   ['OSDJ/.env', 'environment-secret'],
@@ -60,4 +60,20 @@ test('allow public templates and unrelated files to remain tracked', () => {
     auditTrackedFiles(['.env.example', '.env.docker.example', '.env.production.example', 'app/Models/User.php']),
     [],
   );
+});
+
+
+test('third-party workflow actions must use immutable commit pins', () => {
+  assert.deepEqual(
+    auditWorkflowActionPins('steps:\n - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683\n'),
+    [],
+  );
+  assert.deepEqual(
+    auditWorkflowActionPins('steps:\n - uses: actions/checkout@v4\n - uses: shivammathur/setup-php@v2\n'),
+    ['actions/checkout', 'shivammathur/setup-php'],
+  );
+});
+
+test('local composite actions do not need external SHA pins', () => {
+  assert.deepEqual(auditWorkflowActionPins('steps:\n - uses: ./.github/actions/verify\n'), []);
 });

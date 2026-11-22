@@ -15,7 +15,7 @@ class EnsureMfa
             return $next($request);
         }
 
-        if ($request->session()->boolean('security.mfa_verified')) {
+        if ($request->session()->get('security.mfa_verified')) {
             return $next($request);
         }
 

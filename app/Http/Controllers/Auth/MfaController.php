@@ -29,7 +29,7 @@ class MfaController extends Controller
             'configured' => (bool) $user->mfa_secret,
             'secret' => $secret,
             'provisioningUri' => $secret ? $totp->provisioningUri($secret, $user->email) : null,
-            'verified' => $request->session()->boolean('security.mfa_verified'),
+            'verified' => $request->session()->get('security.mfa_verified'),
         ]);
     }
 
@@ -122,7 +122,7 @@ class MfaController extends Controller
 
     public function recovery(Request $request): View
     {
-        abort_unless($request->session()->boolean('security.mfa_verified'), 403);
+        abort_unless($request->session()->get('security.mfa_verified'), 403);
         $codes = $request->session()->get('mfa_recovery_display');
         abort_unless(is_array($codes), 404);
         $request->session()->forget('mfa_recovery_display');
@@ -138,7 +138,7 @@ class MfaController extends Controller
             'current_password' => ['required', 'string'],
             'code' => ['required', 'string', 'max:64'],
         ]);
-        if (! $request->session()->boolean('security.mfa_verified')
+        if (! $request->session()->get('security.mfa_verified')
             || ! Hash::check($data['current_password'], $request->user()->password)) {
             throw ValidationException::withMessages(['current_password' => 'Konfirmasi ulang password dan MFA diperlukan.']);
         }

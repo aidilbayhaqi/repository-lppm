@@ -18,7 +18,7 @@ class SessionSecurityController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         $data = $request->validate(['current_password' => ['required', 'string']]);
-        $wasMfaVerified = $request->session()->boolean('security.mfa_verified');
+        $wasMfaVerified = $request->session()->get('security.mfa_verified');
 
         $user = DB::transaction(function () use ($request, $data) {
             $user = User::query()->lockForUpdate()->findOrFail($request->user()->id);

@@ -198,35 +198,44 @@ class ProductionSecurityTest extends TestCase
 
     public function test_production_preflight_rejects_missing_database_and_redis_credentials(): void
     {
-        $this->app->instance('env', 'production');
-        config([
-            'database.default' => 'mysql',
-            'database.connections.mysql.username' => 'root',
-            'database.connections.mysql.password' => '',
-            'database.connections.mysql.url' => null,
-            'database.redis.default.url' => null,
-            'database.redis.cache.url' => null,
-            'database.redis.default.password' => null,
-            'database.redis.cache.password' => null,
-        ]);
+        $originalConnection = config('database.default');
 
-        $this->artisan('repository:production-check', ['--skip-services' => true])
-            ->expectsOutput('[FAIL] Database MySQL terpisah dari akun root')
-            ->expectsOutput('[FAIL] Database password nonkosong')
-            ->expectsOutput('[FAIL] Redis password terpasang')
-            ->assertFailed();
+        try {
+            $this->app->instance('env', 'production');
+            config([
+                'database.default' => 'mysql',
+                'database.connections.mysql.username' => 'root',
+                'database.connections.mysql.password' => '',
+                'database.connections.mysql.url' => null,
+                'database.redis.default.url' => null,
+                'database.redis.cache.url' => null,
+                'database.redis.default.password' => null,
+                'database.redis.cache.password' => null,
+            ]);
 
-        config([
-            'database.connections.mysql.username' => 'repository',
-            'database.connections.mysql.password' => 'only-for-tests',
-            'database.redis.default.password' => 'only-for-tests',
-            'database.redis.cache.password' => 'only-for-tests',
-        ]);
+            $this->artisan('repository:production-check', ['--skip-services' => true])
+                ->expectsOutput('[FAIL] Database MySQL terpisah dari akun root')
+                ->expectsOutput('[FAIL] Database password nonkosong')
+                ->expectsOutput('[FAIL] Redis password terpasang')
+                ->assertFailed();
 
-        $this->artisan('repository:production-check', ['--skip-services' => true])
-            ->expectsOutput('[OK] Database MySQL terpisah dari akun root')
-            ->expectsOutput('[OK] Database password nonkosong')
-            ->expectsOutput('[OK] Redis password terpasang');
+            config([
+                'database.connections.mysql.username' => 'repository',
+                'database.connections.mysql.password' => 'only-for-tests',
+                'database.redis.default.password' => 'only-for-tests',
+                'database.redis.cache.password' => 'only-for-tests',
+            ]);
+
+            $this->artisan('repository:production-check', ['--skip-services' => true])
+                ->expectsOutput('[OK] Database MySQL terpisah dari akun root')
+                ->expectsOutput('[OK] Database password nonkosong')
+                ->expectsOutput('[OK] Redis password terpasang');
+        } finally {
+            // RefreshDatabase holds an SQLite transaction for the entire test.
+            // Never let a config-only preflight test change the connection used
+            // by tearDown and poison all later tests in the same process.
+            config(['database.default' => $originalConnection]);
+        }
     }
 
     public function test_production_preflight_rejects_invalid_app_key(): void

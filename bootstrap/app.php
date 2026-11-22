@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\EnsureActive;
+use App\Http\Middleware\EnsureMfa;
+use App\Http\Middleware\FreshPasswordConfirmation;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SecureSession;
 use App\Http\Middleware\SecurityHeaders;
@@ -18,11 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
-        $middleware->web(append: [SecureSession::class]);
+        $middleware->web(append: [SecureSession::class, EnsureMfa::class]);
         $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO | Request::HEADER_X_FORWARDED_PORT);
         $middleware->trustHosts(at: fn () => ['^'.preg_quote(parse_url(config('app.url'), PHP_URL_HOST), '/').'$'], subdomains: false);
         $middleware->alias([
             'active' => EnsureActive::class,
+            'fresh-password' => FreshPasswordConfirmation::class,
             'role' => RoleMiddleware::class,
         ]);
     })

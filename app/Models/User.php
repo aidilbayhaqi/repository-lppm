@@ -19,7 +19,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         static::updating(function (User $user): void {
             $user->lock_version = (int) $user->getOriginal('lock_version') + 1;
-            if ($user->isDirty(['password', 'email', 'role', 'is_active'])) {
+            if ($user->isDirty(['password', 'email', 'role', 'is_active', 'mfa_secret', 'mfa_recovery_codes'])) {
                 $user->auth_version = (int) $user->getOriginal('auth_version') + 1;
                 $user->remember_token = Str::random(60);
             }
@@ -71,6 +71,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'mfa_secret',
+        'mfa_recovery_codes',
     ];
 
     /*
@@ -88,6 +90,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'auth_version' => 'integer',
             'remember_expires_at' => 'datetime',
             'lock_version' => 'integer',
+            'mfa_secret' => 'encrypted',
+            'mfa_recovery_codes' => 'array',
+            'mfa_last_step' => 'integer',
         ];
     }
 
@@ -96,6 +101,12 @@ class User extends Authenticatable implements MustVerifyEmail
     | Role Helpers
     |--------------------------------------------------------------------------
     */
+
+    public function requiresMfa(): bool
+    {
+        return (bool) config('repository.mfa_enabled')
+            && in_array($this->role, config('repository.mfa_roles', []), true);
+    }
 
     public function isStaff(): bool
     {

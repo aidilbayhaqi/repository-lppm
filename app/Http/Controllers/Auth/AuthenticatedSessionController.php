@@ -28,6 +28,11 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         SessionState::establish($request, $request->user());
+        // Login password is not a fresh confirmation for sensitive actions.
+        $request->session()->forget(['auth.password_confirmed_at', 'security.mfa_verified']);
+        if ($request->user()->requiresMfa()) {
+            return redirect()->route('mfa.challenge');
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

@@ -17,9 +17,34 @@ class ProductionCheck extends Command
     public function handle(): int
     {
         $disk = config('repository.documents_disk');
+
+        // Validate effective runtime config without ever printing secret values.
+        $db = config('database.connections.mysql', []);
+        $dbUrl = filled($db['url'] ?? null) ? parse_url((string) $db['url']) : null;
+        $dbUser = is_array($dbUrl) ? ($dbUrl['user'] ?? null) : ($db['username'] ?? null);
+        $dbPassword = is_array($dbUrl) ? ($dbUrl['pass'] ?? null) : ($db['password'] ?? null);
+        $redisConnections = [
+            config('database.redis.default', []),
+            config('database.redis.cache', []),
+        ];
+
         $checks = [
             'APP_ENV=production dan APP_DEBUG=false' => app()->environment('production') && ! config('app.debug'),
-            'APP_KEY tersedia' => filled(config('app.key')),
+            'APP_KEY valid 32 byte' => $this->hasValidKey(config('app.key')),
+            'Database MySQL terpisah dari akun root' => config('database.default') === 'mysql' && is_string($dbUser) && $dbUser !== '' && strtolower($dbUser) !== 'root',
+            'Database password nonkosong' => is_string($dbPassword) && $dbPassword !== '',
+            'Redis password terpasang' => collect($redisConnections)->every(function ($connection) {
+                if (! is_array($connection)) {
+                    return false;
+                }
+                if (filled($connection['url'] ?? null)) {
+                    $parsed = parse_url((string) $connection['url']);
+
+                    return is_array($parsed) && filled($parsed['pass'] ?? null);
+                }
+
+                return filled($connection['password'] ?? null);
+            }),
             'APP_URL HTTPS' => str_starts_with(config('app.url'), 'https://'),
             'Cookie Secure, HttpOnly, SameSite=Lax/Strict' => config('session.secure') && config('session.http_only') && in_array(config('session.same_site'), ['lax', 'strict']),
             'Payload session terenkripsi' => (bool) config('session.encrypt'),
@@ -65,4 +90,18 @@ class ProductionCheck extends Command
 
         return in_array(false, $checks, true) ? self::FAILURE : self::SUCCESS;
     }
+    private function hasValidKey(mixed $key): bool
+    {
+        if (! is_string($key)) {
+            return false;
+        }
+        if (str_starts_with($key, 'base64:')) {
+            $decoded = base64_decode(substr($key, 7), true);
+
+            return $decoded !== false && strlen($decoded) === 32;
+        }
+
+        return strlen($key) === 32;
+    }
+
 }

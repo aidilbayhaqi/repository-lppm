@@ -173,4 +173,89 @@ class DocumentSecurityTest extends TestCase
     }
 
 
+    public function test_new_pdf_uploads_stop_at_per_work_document_limit_without_leaking_files(): void
+    {
+        Storage::fake('local');
+        config(['repository.document_max_files_per_work' => 1, 'repository.scan_required' => false]);
+        $user = User::factory()->create(['role' => 'dosen']);
+        $work = Publikasi::factory()->draft()->create(['created_by' => $user->id]);
+
+        $this->upload($user, $work)->assertSessionHasNoErrors();
+        $path = Dokumen::firstOrFail()->path_file;
+        $this->upload($user, $work, 'second.pdf', '%PDF-1.4 second')->assertSessionHasErrors('file');
+
+        $this->assertDatabaseCount('dokumen', 1);
+        $this->assertDatabaseCount('document_versions', 1);
+        $this->assertSame([$path], Storage::disk('local')->allFiles());
+    }
+
+    public function test_replacing_pdf_stops_at_version_limit_without_erasing_old_versions(): void
+    {
+        Storage::fake('local');
+        config(['repository.document_max_versions_per_file' => 2, 'repository.scan_required' => false]);
+        $user = User::factory()->create(['role' => 'dosen']);
+        $work = Publikasi::factory()->draft()->create(['created_by' => $user->id]);
+        $this->upload($user, $work)->assertSessionHasNoErrors();
+        $doc = Dokumen::firstOrFail();
+
+        $replace = function (string $name) use ($doc, $work) {
+            return $this->post(route('admin.documents.replace', $doc), [
+                'file' => UploadedFile::fake()->createWithContent($name, '%PDF-1.4 revised'),
+                'publik' => false, 'jenis_dokumen' => 'dokumen_utama',
+                'lock_version' => $work->fresh()->lock_version,
+            ]);
+        };
+
+        $replace('revision-2.pdf')->assertSessionHasNoErrors();
+        $storedFiles = Storage::disk('local')->allFiles();
+        $replace('revision-3.pdf')->assertSessionHasErrors('file');
+
+        $this->assertSame(2, $doc->fresh()->current_version);
+        $this->assertDatabaseCount('document_versions', 2);
+        $this->assertEqualsCanonicalizing($storedFiles, Storage::disk('local')->allFiles());
+    }
+
+    public function test_total_storage_quota_counts_retained_pdf_versions(): void
+    {
+        Storage::fake('local');
+        config(['repository.document_max_storage_mb_per_work' => 1, 'repository.scan_required' => false]);
+        $user = User::factory()->create(['role' => 'dosen']);
+        $work = Publikasi::factory()->draft()->create(['created_by' => $user->id]);
+        $large = '%PDF-1.4 '.str_repeat('A', 600 * 1024);
+        $this->upload($user, $work, 'first.pdf', $large)->assertSessionHasNoErrors();
+        $doc = Dokumen::firstOrFail();
+        $firstFile = $doc->path_file;
+
+        $this->actingAs($user)->post(route('admin.documents.replace', $doc), [
+            'file' => UploadedFile::fake()->createWithContent('second.pdf', $large),
+            'publik' => false, 'jenis_dokumen' => 'dokumen_utama',
+            'lock_version' => $work->fresh()->lock_version,
+        ])->assertSessionHasErrors('file');
+
+        $this->assertSame(1, $doc->fresh()->current_version);
+        $this->assertDatabaseCount('document_versions', 1);
+        $this->assertSame([$firstFile], Storage::disk('local')->allFiles());
+    }
+
+    public function test_soft_deleted_pdf_still_counts_toward_retained_storage_quota(): void
+    {
+        Storage::fake('local');
+        config(['repository.document_max_files_per_work' => 1, 'repository.scan_required' => false]);
+        $user = User::factory()->create(['role' => 'dosen']);
+        $work = Publikasi::factory()->draft()->create(['created_by' => $user->id]);
+        $this->upload($user, $work)->assertSessionHasNoErrors();
+        $doc = Dokumen::firstOrFail();
+        $path = $doc->path_file;
+        $this->actingAs($user)->delete(route('admin.documents.destroy', $doc), [
+            'lock_version' => $work->fresh()->lock_version,
+        ])->assertSessionHasNoErrors();
+
+        $this->upload($user, $work, 'new.pdf', '%PDF-1.4 replacement')->assertSessionHasErrors('file');
+
+        $this->assertSoftDeleted($doc);
+        Storage::disk('local')->assertExists($path);
+        $this->assertDatabaseCount('document_versions', 1);
+    }
+
+
 }

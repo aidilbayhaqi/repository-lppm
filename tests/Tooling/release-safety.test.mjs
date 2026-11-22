@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { auditEntries, auditDockerIgnore, classifyPath } from '../../tools/release-safety.mjs';
+import { auditEntries, auditDockerIgnore, auditTrackedFiles, classifyPath } from '../../tools/release-safety.mjs';
 
 const forbidden = [
   ['OSDJ/.env', 'environment-secret'],
@@ -45,4 +45,19 @@ test('Docker ignore policy requires backup and archive exclusions', () => {
 test('Docker ignore policy rejects broad negative exceptions', () => {
   const content = `.env\n.env.*\nvendor\nnode_modules\nstorage/app/**\nstorage/framework/**\ndeploy/secrets\ndeploy/tls\n.lppm-updater-backups\n*.zip\n*.sql\n*.pem\n*.key\n!*.zip`;
   assert.deepEqual(auditDockerIgnore(content), ['unsafe-negation:!*.zip']);
+});
+
+
+test('reject tracked Docker runtime env, including nested secrets', () => {
+  assert.deepEqual(
+    auditTrackedFiles(['.env.docker', '.env', 'nested/.env.production', 'deploy/secrets/db']),
+    ['.env.docker', '.env', 'nested/.env.production', 'deploy/secrets/db'],
+  );
+});
+
+test('allow public templates and unrelated files to remain tracked', () => {
+  assert.deepEqual(
+    auditTrackedFiles(['.env.example', '.env.docker.example', '.env.production.example', 'app/Models/User.php']),
+    [],
+  );
 });

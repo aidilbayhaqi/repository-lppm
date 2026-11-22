@@ -45,6 +45,7 @@ class DocumentService
                 $work = $subject->newQuery()->lockForUpdate()->findOrFail($subject->id);
                 Gate::forUser($actor)->authorize('update', $work);
                 app(WorkService::class)->checkVersion($work, (int) $input['lock_version']);
+                $this->enforceStorageQuota($work, $file, $replaceId);
                 $document = $replaceId ? $work->dokumen()->lockForUpdate()->findOrFail($replaceId) : new Dokumen;
                 $old = $document->exists ? $document->only(['id', 'current_version', 'checksum', 'publik', 'jenis_dokumen', 'nama_file_asli']) : [];
                 if ($replaceId && ! DocumentVersion::where('dokumen_id', $document->id)->exists()) {
@@ -67,6 +68,42 @@ class DocumentService
         } catch (\Throwable $e) {
             Storage::disk($disk)->delete($path);
             throw $e;
+        }
+    }
+
+    /**
+     * The work row is locked by store(), making concurrent uploads count against
+     * the same quota. Soft-deleted files and all immutable versions still occupy
+     * storage and therefore must remain accounted for.
+     */
+    private function enforceStorageQuota(Model $work, UploadedFile $file, ?int $replaceId): void
+    {
+        $documents = Dokumen::withTrashed()
+            ->where('pemilik_dokumen_type', $work->getMorphClass())
+            ->where('pemilik_dokumen_id', $work->getKey());
+
+        if ($replaceId === null && (clone $documents)->count() >= config('repository.document_max_files_per_work')) {
+            throw ValidationException::withMessages(['file' => 'Batas jumlah dokumen per karya tercapai. Hubungi pengelola.']);
+        }
+
+        if ($replaceId !== null) {
+            $document = (clone $documents)->whereKey($replaceId)->whereNull('deleted_at')->firstOrFail();
+            if ((int) $document->current_version >= config('repository.document_max_versions_per_file')) {
+                throw ValidationException::withMessages(['file' => 'Batas versi dokumen tercapai. Hubungi pengelola.']);
+            }
+        }
+
+        $versionIds = (clone $documents)->select('id');
+        $storedVersions = (int) DocumentVersion::whereIn('dokumen_id', $versionIds)->sum('ukuran_file');
+
+        // Some legacy documents were not yet backfilled into document_versions.
+        $legacyBytes = (int) (clone $documents)
+            ->whereNotIn('id', DocumentVersion::query()->select('dokumen_id'))
+            ->sum('ukuran_file');
+
+        $maxBytes = (int) config('repository.document_max_storage_mb_per_work') * 1024 * 1024;
+        if ($storedVersions + $legacyBytes + (int) $file->getSize() > $maxBytes) {
+            throw ValidationException::withMessages(['file' => 'Kuota penyimpanan dokumen per karya terlampaui. Hubungi pengelola.']);
         }
     }
 

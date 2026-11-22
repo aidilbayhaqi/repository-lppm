@@ -73,10 +73,10 @@ Route::middleware(array_filter(['auth', 'active', 'throttle:mutations', config('
         Route::middleware(['can:manage-users', 'password.confirm'])->prefix('registrations')->name('registrations.')->group(function () {
             Route::get('/', [RegistrationApprovalController::class, 'index'])->name('index');
             Route::get('/{registration}', [RegistrationApprovalController::class, 'show'])->name('show');
-            Route::post('/{registration}/approve', [RegistrationApprovalController::class, 'approve'])->name('approve')->middleware('throttle:20,1');
-            Route::post('/{registration}/reject', [RegistrationApprovalController::class, 'reject'])->name('reject')->middleware('throttle:20,1');
+            Route::post('/{registration}/approve', [RegistrationApprovalController::class, 'approve'])->name('approve')->middleware(['throttle:20,1', 'fresh-password']);
+            Route::post('/{registration}/reject', [RegistrationApprovalController::class, 'reject'])->name('reject')->middleware(['throttle:20,1', 'fresh-password']);
         });
-        Route::resource('users', UserController::class)->except(['show', 'destroy'])->middleware(['can:manage-users', 'password.confirm']);
+        Route::resource('users', UserController::class)->except(['show', 'destroy'])->middleware(['can:manage-users', 'password.confirm', 'fresh-password']);
     });
 });
 require __DIR__.'/auth.php';

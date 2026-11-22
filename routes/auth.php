@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
@@ -38,6 +39,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('mfa', [MfaController::class, 'challenge'])->name('mfa.challenge');
+    Route::post('mfa', [MfaController::class, 'verify'])->middleware('throttle:6,1')->name('mfa.verify');
+    Route::post('mfa/enroll', [MfaController::class, 'enroll'])->middleware('throttle:6,1')->name('mfa.enroll');
+    Route::post('mfa/disable', [MfaController::class, 'disable'])->middleware('throttle:6,1')->name('mfa.disable');
+    Route::get('mfa/recovery', [MfaController::class, 'recovery'])->name('mfa.recovery');
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

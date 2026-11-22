@@ -33,6 +33,7 @@
         <div class="min-w-0 space-y-5">
             <div class="panel">@include('profile.partials.update-profile-information-form')</div>
             <div class="panel">@include('profile.partials.update-password-form')</div>
+            <div class="panel"><h2 class="!text-lg">Autentikasi dua faktor</h2><p class="mt-2 text-sm">{{ $user->mfa_secret ? 'TOTP aktif. Simpan kode pemulihan secara aman.' : 'Gunakan aplikasi authenticator untuk mengamankan akun.' }}</p><a class="button mt-4" href="{{ route('mfa.challenge') }}">{{ $user->mfa_secret ? 'Kelola atau verifikasi MFA' : 'Aktifkan MFA' }}</a></div>
         </div>
         <div class="min-w-0 space-y-5">
             <section class="panel" aria-labelledby="profile-photo-heading">

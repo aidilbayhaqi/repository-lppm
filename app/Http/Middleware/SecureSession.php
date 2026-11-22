@@ -17,7 +17,7 @@ class SecureSession
             $session = $request->session();
             if (Auth::guard('web')->viaRemember() && ! $session->has('security.user_id') && $user->isActive() && $user->remember_expires_at?->isFuture()) {
                 SessionState::establish($request, $user);
-                $session->forget('auth.password_confirmed_at');
+                $session->forget(['auth.password_confirmed_at', 'security.mfa_verified']);
             }
             $now = now()->timestamp;
             $valid = $user->isActive()

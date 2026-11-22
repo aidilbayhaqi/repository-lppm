@@ -194,4 +194,19 @@ class ProductionSecurityTest extends TestCase
         $this->assertSame(1, $user->fresh()->auth_version);
         $this->actingAs($user->fresh())->withSession($oldSession)->get('/admin/dashboard')->assertRedirect('/login');
     }
+
+    public function test_production_preflight_requires_privileged_mfa(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['repository.mfa_enabled' => false]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[FAIL] MFA wajib untuk peran istimewa')
+            ->assertFailed();
+
+        config(['repository.mfa_enabled' => true, 'repository.mfa_roles' => ['admin', 'operator', 'verifier']]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[OK] MFA wajib untuk peran istimewa');
+    }
 }

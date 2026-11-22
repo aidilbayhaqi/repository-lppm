@@ -30,6 +30,7 @@ class ProductionCheck extends Command
             'Email menggunakan SMTP/provider' => ! in_array(config('mail.default'), ['log', 'array']),
             'Alamat pengirim dan host SMTP terisi' => filled(config('mail.from.address')) && (config('mail.default') !== 'smtp' || filled(config('mail.mailers.smtp.host'))),
             'Verifikasi email aktif' => (bool) config('repository.require_verified_email'),
+            'MFA wajib untuk peran istimewa' => (bool) config('repository.mfa_enabled') && count(array_intersect(['admin', 'operator', 'verifier'], config('repository.mfa_roles', []))) === 3,
             'Pemindaian dokumen wajib' => (bool) config('repository.scan_required'),
             'Disk dokumen privat' => config('filesystems.disks.'.$disk.'.driver') === 'local' && ! str_starts_with(rtrim((string) config('filesystems.disks.'.$disk.'.root'), '/').'/', public_path().'/') && $disk !== 'public' && ! config('filesystems.disks.'.$disk.'.serve') && config('filesystems.disks.'.$disk.'.visibility') !== 'public',
             'Trusted proxy tidak menggunakan wildcard' => ! in_array('*', config('repository.trusted_proxies'), true),

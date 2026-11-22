@@ -2,6 +2,7 @@
 /** OSDJ-LPPM release safety gate. Node 22+, no dependencies, read-only. */
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 const REQUIRED_IGNORE = [
@@ -101,6 +102,26 @@ function printReasons(reasons) {
   }
 }
 
+
+/**
+ * Reject tracked private runtime files. .gitignore alone cannot protect files
+ * that were committed earlier, so enforce this on the Git index in CI.
+ */
+export function auditTrackedFiles(paths) {
+  const allowed = new Set([
+    '.env.example',
+    '.env.production.example',
+    '.env.docker.example',
+    '.env.testing.example',
+  ]);
+  return paths.filter(p => {
+    const normal = p.replaceAll('\\', '/');
+    const base = normal.split('/').at(-1);
+    if (normal === 'auth.json' || /(?:^|\/)deploy\/secrets\//i.test(normal)) return true;
+    return base === '.env' || (base.startsWith('.env.') && !allowed.has(base));
+  });
+}
+
 export function main(args) {
   if (args.length !== 2 || !['--source','--archive'].includes(args[0])) {
     process.stderr.write('Penggunaan: node tools/release-safety.mjs --source PROJECT_DIR | --archive FILE.zip\n');
@@ -123,6 +144,20 @@ export function main(args) {
   const dockerfile = path.join(root, 'Dockerfile');
   if (!fs.existsSync(dockerignore) || !fs.existsSync(dockerfile)) {
     process.stderr.write('FAIL: .dockerignore atau Dockerfile tidak tersedia.\n');
+    return 1;
+  }
+
+  // A fresh checkout may have no secrets in its working tree but still track
+  // them in Git; scan the index without ever printing file contents.
+  const index = spawnSync('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8' });
+  if (index.error || index.status !== 0) {
+    process.stderr.write('FAIL: tidak dapat memeriksa tracked files dengan git ls-files.\n');
+    return 1;
+  }
+  const trackedSecrets = auditTrackedFiles(index.stdout.split('\0').filter(Boolean));
+  if (trackedSecrets.length) {
+    process.stderr.write('FAIL tracked sensitive runtime files (remove from Git index):\n');
+    trackedSecrets.forEach(v => process.stderr.write(' - '+v+'\n'));
     return 1;
   }
   const missing = auditDockerIgnore(fs.readFileSync(dockerignore, 'utf8'));

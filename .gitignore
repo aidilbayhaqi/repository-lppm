@@ -33,6 +33,11 @@ Thumbs.db
 
 !.env.docker.example
 
+# Never commit runtime Docker credentials or generated local configuration.
+.env.docker
+.env.mysql
+.env.*.local
+
 # BEGIN OSDJ RELEASE SAFETY — DevSecOps 2026-11-19
 /.lppm-updater-backups/
 /.lppm-*/

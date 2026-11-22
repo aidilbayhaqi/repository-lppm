@@ -4,7 +4,6 @@ const form = document.querySelector('[data-registration-form]');
 if (form) {
     const roleSelect = form.querySelector('#requested_role');
     const identifier = form.querySelector('#identifier');
-    const identifierLabel = form.querySelector('[data-identifier-label]');
     const identifierRequired = form.querySelector('[data-identifier-required]');
     const identifierHelp = form.querySelector('[data-identifier-help]');
     const programField = form.querySelector('[data-program-field]');
@@ -17,11 +16,6 @@ if (form) {
 
         identifier.required = academic;
         identifierRequired.hidden = !academic;
-        identifierLabel.firstChild.textContent = role === 'mahasiswa'
-            ? 'NIM '
-            : lecturer
-                ? 'NIDN '
-                : 'Nomor identitas ';
         identifier.placeholder = role === 'mahasiswa'
             ? 'Masukkan NIM'
             : lecturer

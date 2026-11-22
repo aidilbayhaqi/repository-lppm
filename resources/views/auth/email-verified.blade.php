@@ -11,8 +11,8 @@
             Email berhasil diverifikasi
         </h1>
         <p class="mt-4 text-sm leading-7 text-[var(--muted)]">
-            Alamat email akun Anda sudah dikonfirmasi. Sekarang Anda dapat melanjutkan
-            ke ruang kerja repositori sesuai peran dan akses yang disetujui.
+            Alamat email akun Anda sudah dikonfirmasi. Silakan masuk dengan email dan
+            password untuk melanjutkan ke ruang kerja repositori.
         </p>
 
         <div class="mt-6 rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-left">
@@ -22,8 +22,8 @@
             </p>
         </div>
 
-        <a href="{{ route('dashboard') }}" class="button full mt-7 inline-flex items-center justify-center gap-2">
-            Masuk ke dashboard
+        <a href="{{ route('login') }}" class="button full mt-7 inline-flex items-center justify-center gap-2">
+            Lanjut ke halaman login
             <x-icon name="arrow-right" size="18" />
         </a>
 

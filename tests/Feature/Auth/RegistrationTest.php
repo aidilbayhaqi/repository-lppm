@@ -168,6 +168,7 @@ class RegistrationTest extends TestCase
             ->assertOk()
             ->assertSee('registration-identity-title')
             ->assertSee('registration-security-title')
+            ->assertSee('NIM/NIDN/No Identitas')
             ->assertSee('value="reviewer"', false)
             ->assertSee('value="verifier"', false)
             ->assertDontSee('value="admin"', false);

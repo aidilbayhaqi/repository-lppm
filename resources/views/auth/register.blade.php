@@ -56,7 +56,7 @@
 
                         <div class="form-field">
                             <label for="identifier" data-identifier-label class="mb-2 block text-sm font-medium">
-                                Nomor identitas <span data-identifier-required aria-hidden="true" class="text-red-600" @if (! in_array(old('requested_role'), ['mahasiswa', 'dosen'], true)) hidden @endif>*</span>
+                                NIM/NIDN/No Identitas <span data-identifier-required aria-hidden="true" class="text-red-600" @if (! in_array(old('requested_role'), ['mahasiswa', 'dosen'], true)) hidden @endif>*</span>
                             </label>
                             <input class="w-full" id="identifier" name="identifier" maxlength="100" value="{{ old('identifier') }}"
                                 placeholder="NIM, NIDN, atau identitas lainnya" autocomplete="off"

@@ -11,6 +11,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LookupController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SessionSecurityController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\WorkCoverController;
 use App\Http\Controllers\RepositoryController;
@@ -31,6 +32,7 @@ Route::get('/dokumen/{document}/download', [DocumentController::class, 'download
 Route::middleware(array_filter(['auth', 'active', 'throttle:mutations', config('repository.require_verified_email') ? 'verified' : null]))->group(function () {
     Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/revoke-other-sessions', SessionSecurityController::class)->middleware('throttle:6,1')->name('profile.sessions.revoke');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile/photo', [ProfilePhotoController::class, 'store'])->name('profile.photo.store');

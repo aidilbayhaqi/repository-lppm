@@ -56,6 +56,7 @@
                     </form>
                 @endif
             </section>
+            <section class="panel"><h2 class="!text-lg">Sesi dan perangkat</h2><p class="mt-2 text-sm">Cabut sesi lain setelah konfirmasi password. Browser ini tetap aktif; Remember me juga dicabut.</p><form class="mt-4 space-y-3" method="post" action="{{ route('profile.sessions.revoke') }}">@csrf<label class="block text-sm" for="revoke-password">Password akun</label><input id="revoke-password" class="w-full" type="password" name="current_password" autocomplete="current-password" required><x-input-error :messages="$errors->get('current_password')" /><button class="button button-outline" type="submit">Keluar dari perangkat lain</button></form></section>
             <div class="panel">@include('profile.partials.delete-user-form')</div>
         </div>
     </div>

@@ -84,6 +84,14 @@ Log production berisi request ID, user ID, nama route, metode, status, dan duras
 - Penerapan **assignment verifier individual** belum ada: semua verifier yang aktif dan terverifikasi masih bisa memeriksa antrean bersama. Perlu desain penugasan jika pemeriksaan wajib dibatasi per orang. Reviewer tetap role berbeda tanpa izin verifikasi.
 - Tambah regresi: akses PDF, versi dan cover privat oleh pemilik email belum diverifikasi, pengecualian PDF/cover publik, larangan akses draft dengan ID berbeda, daftar antrean Verifier, dan larangan mutasi Reviewer. Uji ulang pada MySQL dan staging sebelum produksi.
 
+## Security Sprint 2: MFA dan pencabutan sesi
+
+- TOTP + recovery codes opt-in menggunakan `MFA_ENABLED`. Secret terenkripsi via APP_KEY, recovery codes berbentuk hash, digunakan sekali, dan TOTP tidak boleh replay.
+- Wajib untuk admin/operator/verifier saat flag aktif. Enrollment memerlukan password dan TOTP; peran wajib tidak boleh menonaktifkan MFA.
+- Login normal tidak lagi mengonfirmasi password untuk tindakan admin; tindakan pengelolaan akun dan persetujuan memerlukan konfirmasi terbaru (maksimal lima menit).
+- Revoke sesi lain melalui profil memerlukan password, merotasi remember token dan menambah auth_version; sesi lama ditolak pada request selanjutnya. Belum ada daftar perangkat granular.
+- Sebelum enable produksi: backup APP_KEY, latihan recovery dan rencana break-glass tertulis.
+
 ## Kontrol operasional dan batas rilis
 
 TLS, firewall, patch server, backup terenkripsi, restore test, monitoring, dan pengelolaan secret tetap tanggung jawab deployment. MFA/SSO admin **belum diimplementasikan**; bila diwajibkan institusi, pasang identity gateway atau implementasikan MFA sebelum membuka panel admin ke internet. Tidak ada crawler URL pengguna, sehingga jangan menambahkan fetch URL tanpa pertahanan SSRF. Review penetrasi independen dan pemeriksaan kepatuhan institusi belum dilakukan.

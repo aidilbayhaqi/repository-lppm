@@ -114,6 +114,22 @@ class MfaSecurityTest extends TestCase
             ->get(route('admin.users.index'))->assertRedirect(route('password.confirm'));
     }
 
+    public function test_revoke_other_sessions_requires_password_and_keeps_only_current_browser(): void
+    {
+        config(['repository.mfa_enabled' => false]);
+        $user = User::factory()->create(['role' => 'mahasiswa']);
+        $original = \App\Support\SessionState::attributes($user);
+        $this->actingAs($user)->post(route('profile.sessions.revoke'), ['current_password' => 'wrong'])
+            ->assertSessionHasErrors('current_password');
+        $this->assertSame(0, $user->fresh()->auth_version);
+        $this->post(route('profile.sessions.revoke'), ['current_password' => 'password'])
+            ->assertRedirect(route('profile.edit'))->assertSessionHasNoErrors();
+        $this->assertSame(1, $user->fresh()->auth_version);
+        $this->get(route('profile.edit'))->assertOk();
+        $this->actingAs($user->fresh())->withSession($original)
+            ->getJson('/admin/dashboard')->assertUnauthorized();
+    }
+
     public function test_non_privileged_login_is_not_forced_through_mfa(): void
     {
         config(['repository.mfa_enabled' => true]);

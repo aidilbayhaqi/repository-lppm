@@ -12,6 +12,21 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// The signed URL is proof of mailbox access; visiting it must never log the user in.
+// The success view is only available once after a valid verification in this browser.
+Route::get('verify-email/success', function (\Illuminate\Http\Request $request) {
+    if (! $request->session()->pull('verification_success', false)) {
+        return redirect()->route('login');
+    }
+
+    return view('auth.email-verified');
+})->name('verification.success');
+
+Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->whereNumber('id')
+    ->name('verification.verify');
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->middleware('guest')
@@ -46,14 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::get('mfa/recovery', [MfaController::class, 'recovery'])->name('mfa.recovery');
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
-
-    Route::view('verify-email/success', 'auth.email-verified')
-        ->middleware('verified')
-        ->name('verification.success');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')

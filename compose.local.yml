@@ -1,10 +1,13 @@
+
 name: osdj-local
+
 x-local: &local
   build:
     context: .
     target: app
   image: osdj-local:1.4
-  env_file: .env.docker
+  env_file:
+    - .env.docker
   init: true
   volumes:
     - local-documents:/var/www/html/storage/app/private
@@ -13,64 +16,152 @@ x-local: &local
       condition: service_healthy
     redis:
       condition: service_healthy
-  networks: [local]
+  networks:
+    - local
+
 services:
+
+  # ==========================================
+  # LARAVEL APPLICATION
+  # ==========================================
   app:
     <<: *local
-    command: [php, artisan, serve, --host=0.0.0.0, --port=8000, --no-reload]
-    ports: ["127.0.0.1:8000:8000"]
+    command:
+      - php
+      - artisan
+      - serve
+      - --host=0.0.0.0
+      - --port=8000
+      - --no-reload
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
+  # ==========================================
+  # QUEUE WORKER
+  # ==========================================
   worker:
     <<: *local
-    command: [php, artisan, queue:work, database, --sleep=2, --tries=3, --timeout=60]
+    command:
+      - php
+      - artisan
+      - queue:work
+      - database
+      - --sleep=2
+      - --tries=3
+      - --timeout=60
     restart: unless-stopped
     stop_grace_period: 90s
+
+  # ==========================================
+  # TASK SCHEDULER
+  # ==========================================
   scheduler:
     <<: *local
-    command: [php, artisan, schedule:work]
+    command:
+      - php
+      - artisan
+      - schedule:work
     restart: unless-stopped
+
+  # ==========================================
+  # MYSQL DATABASE - LOCAL DEVELOPMENT ONLY
+  # ==========================================
   mysql:
     image: mysql:8.4
     environment:
       MYSQL_DATABASE: repository_local
-      MYSQL_USER: repository
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Fill DB_PASSWORD in .env.docker}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Fill MYSQL_ROOT_PASSWORD in .env.docker}
-    volumes: [local-database:/var/lib/mysql]
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_HOST: "%"
+    volumes:
+      - local-database-no-password:/var/lib/mysql
     healthcheck:
-      test: [CMD-SHELL, "mysqladmin ping -h 127.0.0.1 --silent"]
+      test:
+        - CMD-SHELL
+        - 'mysql --protocol=socket -u root -Nse "SELECT 1" >/dev/null 2>&1'
       interval: 5s
       timeout: 5s
       retries: 20
-    networks: [local]
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - local
+
+  # ==========================================
+  # REDIS - CACHE AND SESSION
+  # ==========================================
   redis:
     image: redis:7.4-alpine
-    command: [redis-server, --maxmemory, 128mb, --maxmemory-policy, noeviction]
+    command:
+      - redis-server
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - noeviction
     healthcheck:
-      test: [CMD, redis-cli, ping]
+      test:
+        - CMD
+        - redis-cli
+        - ping
       interval: 5s
       timeout: 3s
       retries: 10
-    networks: [local]
+    restart: unless-stopped
+    networks:
+      - local
+
+  # ==========================================
+  # MAILPIT - LOCAL EMAIL TESTING
+  # ==========================================
   mailpit:
     image: axllent/mailpit:v1.30
-    ports: ["127.0.0.1:8025:8025"]
-    networks: [local]
+    ports:
+      - "127.0.0.1:8025:8025"
+    restart: unless-stopped
+    networks:
+      - local
+
+  # ==========================================
+  # CLAMAV - OPTIONAL VIRUS SCANNER
+  # ==========================================
   clamav:
     image: clamav/clamav:1.4
-    profiles: [scanner]
-    volumes: [local-signatures:/var/lib/clamav]
-    networks: [local]
+    profiles:
+      - scanner
+    volumes:
+      - local-signatures:/var/lib/clamav
+    networks:
+      - local
+
+  # ==========================================
+  # AUTOMATED TESTING
+  # ==========================================
   tests:
-    profiles: [test]
+    profiles:
+      - test
     build:
       context: .
       target: testing
-    command: [php, artisan, test, --compact]
-    networks: [local]
+    command:
+      - php
+      - artisan
+      - test
+      - --compact
+    networks:
+      - local
+
+# ==========================================
+# PERSISTENT VOLUMES
+# ==========================================
 volumes:
   local-database:
+  local-database-no-password:
   local-documents:
   local-signatures:
+
+# ==========================================
+# DOCKER NETWORK
+# ==========================================
 networks:
   local:
     driver: bridge

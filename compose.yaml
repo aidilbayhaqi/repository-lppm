@@ -1,0 +1,5 @@
+name: osdj-local
+
+include:
+  - path: ./compose.local.yml
+    env_file: ./.env.docker

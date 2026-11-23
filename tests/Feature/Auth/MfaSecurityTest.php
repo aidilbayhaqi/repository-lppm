@@ -93,7 +93,7 @@ class MfaSecurityTest extends TestCase
         $admin->forceFill(['mfa_secret' => $secret])->save();
 
         \Illuminate\Support\Facades\Log::spy();
-        $this->actingAs($admin)->post(route('mfa.verify'), ['code' => '000000'])
+        $this->actingAs($admin)->post(route('mfa.verify'), ['code' => 'invalid-recovery-code'])
             ->assertSessionHasErrors('code');
 
         \Illuminate\Support\Facades\Log::shouldHaveReceived('warning')

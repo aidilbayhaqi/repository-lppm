@@ -85,6 +85,50 @@ class MfaSecurityTest extends TestCase
         $this->post(route('mfa.verify'), ['code' => $recovery])->assertSessionHasErrors('code');
     }
 
+    public function test_failed_mfa_attempt_logs_metadata_without_the_submitted_code(): void
+    {
+        config(['repository.mfa_enabled' => true]);
+        $admin = User::factory()->admin()->create();
+        $secret = app(Totp::class)->generateSecret();
+        $admin->forceFill(['mfa_secret' => $secret])->save();
+
+        \Illuminate\Support\Facades\Log::spy();
+        $this->actingAs($admin)->post(route('mfa.verify'), ['code' => '000000'])
+            ->assertSessionHasErrors('code');
+
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('warning')
+            ->once()
+            ->withArgs(function ($message, $context) use ($admin) {
+                return $message === 'security.mfa_challenge_failed'
+                    && $context['user_id'] === $admin->id
+                    && ! array_key_exists('code', $context)
+                    && ! array_key_exists('secret', $context)
+                    && ! array_key_exists('password', $context);
+            });
+    }
+
+    public function test_valid_mfa_logs_a_success_event_without_a_totp_value(): void
+    {
+        config(['repository.mfa_enabled' => true]);
+        $admin = User::factory()->admin()->create();
+        $secret = app(Totp::class)->generateSecret();
+        $admin->forceFill(['mfa_secret' => $secret])->save();
+        $code = app(Totp::class)->codeForStep($secret, intdiv(time(), 30));
+
+        \Illuminate\Support\Facades\Log::spy();
+        $this->actingAs($admin)->post(route('mfa.verify'), ['code' => $code])
+            ->assertSessionHasNoErrors();
+
+        \Illuminate\Support\Facades\Log::shouldHaveReceived('info')
+            ->once()
+            ->withArgs(function ($message, $context) use ($admin) {
+                return $message === 'security.mfa_challenge_succeeded'
+                    && $context['user_id'] === $admin->id
+                    && ! array_key_exists('code', $context)
+                    && ! array_key_exists('secret', $context);
+            });
+    }
+
     public function test_mandatory_mfa_cannot_be_disabled_by_privileged_user(): void
     {
         config(['repository.mfa_enabled' => true]);

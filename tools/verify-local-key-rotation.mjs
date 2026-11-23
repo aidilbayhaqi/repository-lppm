@@ -30,16 +30,41 @@ export function appKeyBytes(contents) {
   return result.length === 32 ? result : null;
 }
 
+/**
+ * Laravel accepts APP_PREVIOUS_KEYS for decryption. A leaked former key here
+ * remains active cryptographic material even after changing APP_KEY.
+ * Return null when the list cannot be parsed safely.
+ */
+export function previousKeyBytes(contents) {
+  if (typeof contents !== 'string') return null;
+  const matches = [...contents.matchAll(/^[ \t]*APP_PREVIOUS_KEYS[ \t]*=[ \t]*([^\r\n]*)/gm)];
+  if (matches.length > 1) return null;
+  if (!matches.length) return [];
+  let value = matches[0][1].trim();
+  if (/^(["']).*\1$/.test(value)) value = value.slice(1, -1);
+  if (!value) return [];
+  const keys = [];
+  for (const valuePart of value.split(',')) {
+    const decoded = appKeyBytes('APP_KEY='+valuePart.trim());
+    if (!decoded) return null;
+    keys.push(decoded);
+  }
+  return keys;
+}
+
 /** Return only a status; actual secrets must not enter stdout/logs. */
 export function compareLocalToCommittedKeys(localContents, historicalContents) {
   const local = appKeyBytes(localContents);
   if (!local) return 'invalid-local-key';
+  const previousKeys = previousKeyBytes(localContents);
+  if (previousKeys === null) return 'invalid-previous-keys';
   let compared = 0;
   for (const history of historicalContents) {
-    const previous = appKeyBytes(history);
-    if (!previous) continue;
+    const leaked = appKeyBytes(history);
+    if (!leaked) continue;
     compared++;
-    if (timingSafeEqual(local, previous)) return 'historical-key-reused';
+    if (timingSafeEqual(local, leaked)) return 'historical-key-reused';
+    if (previousKeys.some(key => timingSafeEqual(key, leaked))) return 'historical-previous-key-reused';
   }
   return compared ? 'different-from-history' : 'historical-keys-unavailable';
 }
@@ -82,8 +107,8 @@ export function main(args) {
       process.stdout.write('PASS: current local APP_KEY differs from keys found in committed .env.docker history.\n');
       return 0;
     }
-    if (status === 'historical-key-reused') {
-      process.stderr.write('FAIL: current local APP_KEY matches an exposed historical key. Rotate only after backup and encryption-data review.\n');
+    if (status === 'historical-key-reused' || status === 'historical-previous-key-reused') {
+      process.stderr.write('FAIL: APP_KEY or APP_PREVIOUS_KEYS still accepts an exposed historical key. Review rotation and fallback config after backup.\n');
       return 1;
     }
     process.stderr.write('UNVERIFIED: invalid local APP_KEY or no comparable historical key found; do not infer safety.\n');

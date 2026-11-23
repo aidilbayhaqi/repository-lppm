@@ -35,3 +35,10 @@ Tool ini membaca daftar path di ZIP, **tidak pernah menampilkan nilai `.env` ata
 ### Secret incident
 
 Bila arsip lama pernah dibagikan ke pihak tak berwenang: batasi akses arsip, identifikasi credential yang mungkin terekspos, susun rotasi sesuai dependensi aplikasi dan data terenkripsi, serta konsultasikan pemilik sistem. **Jangan langsung mengganti `APP_KEY` secara spontan** karena data terenkripsi dan session bisa terdampak. Jangan mengirim isi `.env` atau dump DB melalui chat.
+
+
+## Immutable CI actions dan update dependency
+
+Workflow .github/workflows/ci.yml menggunakan commit SHA eksplisit untuk actions/checkout, actions/setup-node, dan shivammathur/setup-php. GitHub API mengonfirmasi commit tersebut sesuai tag rilis resmi pada 22 November 2026. Gate release-safety.mjs --source menolak action pihak ketiga yang memakai versi/tag bergerak.
+
+Dependabot di .github/dependabot.yml mengusulkan pembaruan Composer, npm, dan GitHub Actions setiap minggu. Perubahan tidak di-merge otomatis; periksa provenance SHA, diff, advisory, dan CI. Pinning tidak menggantikan SBOM, SAST, DAST atau vulnerability scanning container.

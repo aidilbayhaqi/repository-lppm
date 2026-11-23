@@ -122,6 +122,20 @@ export function auditTrackedFiles(paths) {
   });
 }
 
+
+/** Reject movable upstream action tags; allow local composite actions. */
+export function auditWorkflowActionPins(workflow) {
+  const issues = [];
+  for (const match of workflow.matchAll(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/gm)) {
+    const action = match[1];
+    if (action.startsWith('./') || action.startsWith('docker://')) continue;
+    if (!/^[^@\s]+@[0-9a-fA-F]{40}$/.test(action)) {
+      issues.push(action.split('@')[0]);
+    }
+  }
+  return issues;
+}
+
 export function main(args) {
   if (args.length !== 2 || !['--source','--archive'].includes(args[0])) {
     process.stderr.write('Penggunaan: node tools/release-safety.mjs --source PROJECT_DIR | --archive FILE.zip\n');
@@ -158,6 +172,17 @@ export function main(args) {
   if (trackedSecrets.length) {
     process.stderr.write('FAIL tracked sensitive runtime files (remove from Git index):\n');
     trackedSecrets.forEach(v => process.stderr.write(' - '+v+'\n'));
+    return 1;
+  }
+  const workflowPath = path.join(root, '.github', 'workflows', 'ci.yml');
+  if (!fs.existsSync(workflowPath)) {
+    process.stderr.write('FAIL: workflow CI tidak ditemukan.\n');
+    return 1;
+  }
+  const mutableActions = auditWorkflowActionPins(fs.readFileSync(workflowPath, 'utf8'));
+  if (mutableActions.length) {
+    process.stderr.write('FAIL: GitHub Actions belum dipin ke SHA commit:\n');
+    mutableActions.forEach(action => process.stderr.write(' - ' + action + '\n'));
     return 1;
   }
   const missing = auditDockerIgnore(fs.readFileSync(dockerignore, 'utf8'));

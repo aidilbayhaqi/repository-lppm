@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { appKeyBytes, compareLocalToCommittedKeys } from '../../tools/verify-local-key-rotation.mjs';
+import { appKeyBytes, previousKeyBytes, compareLocalToCommittedKeys } from '../../tools/verify-local-key-rotation.mjs';
 
 function envWithKey(n, quoted = false) {
   const key = 'base64:' + Buffer.alloc(32, n).toString('base64');
@@ -30,4 +30,17 @@ test('new local key passes only after a valid historical key was compared', () =
 
 test('bad local key cannot be certified as rotated', () => {
   assert.equal(compareLocalToCommittedKeys('APP_KEY=not-a-valid-key', [envWithKey(4)]), 'invalid-local-key');
+});
+
+
+test('fallback decryption key matching an exposed historical key is rejected', () => {
+  const previous = 'base64:' + Buffer.alloc(32, 4).toString('base64');
+  const current = envWithKey(8) + 'APP_PREVIOUS_KEYS="' + previous + '"\n';
+  assert.equal(previousKeyBytes(current)?.length, 1);
+  assert.equal(compareLocalToCommittedKeys(current, [envWithKey(4)]), 'historical-previous-key-reused');
+});
+
+test('invalid or duplicate APP_PREVIOUS_KEYS fails closed', () => {
+  assert.equal(compareLocalToCommittedKeys(envWithKey(8)+'APP_PREVIOUS_KEYS=not-valid\n', [envWithKey(4)]), 'invalid-previous-keys');
+  assert.equal(compareLocalToCommittedKeys(envWithKey(8)+'APP_PREVIOUS_KEYS=\nAPP_PREVIOUS_KEYS=\n', [envWithKey(4)]), 'invalid-previous-keys');
 });

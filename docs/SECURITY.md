@@ -30,6 +30,8 @@ Email verifikasi dan reset dikirim melalui queue setelah transaksi commit. Panta
 
 Remember me memakai token recall Laravel; password tidak disimpan di localStorage atau JavaScript. Login tanpa checkbox tidak membuat cookie recall baru. Sesi hasil recall diganti ID-nya dan tidak dianggap sebagai konfirmasi password. Akun nonaktif, token berubah, atau batas server kedaluwarsa tidak boleh membentuk sesi baru. Perubahan password/email/peran/keaktifan merotasi token; logout Laravel juga merotasi token recall akun. Implementasi token Laravel bersifat per akun, belum menyediakan daftar atau pencabutan token per perangkat. Pada perangkat bersama, jangan centang Remember me.
 
+Input email untuk login, password reset, dan route autentikasi dinormalisasi hanya jika bertipe string. Nilai array atau objek dipertahankan untuk ditolak oleh validation layer, bukan di-cast ke string dalam rate limiter (mencegah exception sebelum validasi). Input tidak valid memakai bucket throttling akun bersama dan tetap terkena batas per IP.
+
 ## Rate limit
 
 | Kegiatan | Batas aplikasi |

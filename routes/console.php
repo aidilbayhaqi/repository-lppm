@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('repository:recover-publishing')->everyFiveMinutes()->onOneServer()->withoutOverlapping();
+// Alert using a production log collector; do not run on developer machines.
+Schedule::command('repository:monitor-security')->everyFiveMinutes()->onOneServer()->withoutOverlapping()->when(fn () => app()->environment('production'));

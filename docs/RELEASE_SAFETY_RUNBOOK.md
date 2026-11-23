@@ -42,3 +42,10 @@ Bila arsip lama pernah dibagikan ke pihak tak berwenang: batasi akses arsip, ide
 Workflow .github/workflows/ci.yml menggunakan commit SHA eksplisit untuk actions/checkout, actions/setup-node, dan shivammathur/setup-php. GitHub API mengonfirmasi commit tersebut sesuai tag rilis resmi pada 22 November 2026. Gate release-safety.mjs --source menolak action pihak ketiga yang memakai versi/tag bergerak.
 
 Dependabot di .github/dependabot.yml mengusulkan pembaruan Composer, npm, dan GitHub Actions setiap minggu. Perubahan tidak di-merge otomatis; periksa provenance SHA, diff, advisory, dan CI. Pinning tidak menggantikan SBOM, SAST, DAST atau vulnerability scanning container.
+
+
+## Image SBOM — OWASP 2025 A03/A08
+
+Setiap job `docker` di CI kini membangun image aplikasi dan Nginx lalu membuat dua artefak CycloneDX JSON dari **image build yang sama**, bukan hanya source lockfile. Scanner `Syft v1.57.2` dan `anchore/sbom-action v0.24.3` dikunci; SHA action diverifikasi terhadap GitHub official release. `tools/verify-sbom.mjs` menolak output non-CycloneDX atau daftar komponen kosong/tidak valid. Artefak bernama `osdj-app-cyclonedx-sbom` dan `osdj-web-cyclonedx-sbom` tersedia dari run Actions dan mengikuti kebijakan retensi artefak organisasi.
+
+SBOM membantu inventaris dan analisis CVE, **bukan** bukti image bebas vulnerability. Lengkapi dengan scan CVE berdasarkan SBOM, vulnerability triage, SBOM untuk image yang benar-benar dipromosikan di staging/production (digest & release tag sama), provenance/signature, dan approval release. Jangan mengasumsikan image lokal `RELEASE_TAG=local` sama dengan production bila image dibangun ulang.

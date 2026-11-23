@@ -49,3 +49,10 @@ Dependabot di .github/dependabot.yml mengusulkan pembaruan Composer, npm, dan Gi
 Setiap job `docker` di CI kini membangun image aplikasi dan Nginx lalu membuat dua artefak CycloneDX JSON dari **image build yang sama**, bukan hanya source lockfile. Scanner `Syft v1.57.2` dan `anchore/sbom-action v0.24.3` dikunci; SHA action diverifikasi terhadap GitHub official release. `tools/verify-sbom.mjs` menolak output non-CycloneDX atau daftar komponen kosong/tidak valid. Artefak bernama `osdj-app-cyclonedx-sbom` dan `osdj-web-cyclonedx-sbom` tersedia dari run Actions dan mengikuti kebijakan retensi artefak organisasi.
 
 SBOM membantu inventaris dan analisis CVE, **bukan** bukti image bebas vulnerability. Lengkapi dengan scan CVE berdasarkan SBOM, vulnerability triage, SBOM untuk image yang benar-benar dipromosikan di staging/production (digest & release tag sama), provenance/signature, dan approval release. Jangan mengasumsikan image lokal `RELEASE_TAG=local` sama dengan production bila image dibangun ulang.
+
+
+## Active secret content gate (OWASP A04)
+
+The source gate now checks **tracked text files** for high-confidence embedded Laravel APP_KEY values, PEM private-key headers, GitHub PATs, and AWS access key identifiers. It prints only file paths and categories—not matched values, lines, or environment contents. Files beyond 4 MiB in recognized text formats and tracked symlinks cause a conservative failure. Files ignored by Git, including each developer's untracked .env, are not opened.
+
+This is deliberately a narrow preventive guard: it **does not scan historical commits**, does not detect every token/provider format, cannot certify absence of secrets, and does not replace dedicated GitHub secret scanning or a history-aware scanner. Existing APP_KEY previously committed in .env.docker remains an unresolved incident until the owner assesses usage, creates verified backups, rotates safely if necessary, and approves any coordinated history remediation. Never commit original key values, even in a ticket or fixture.

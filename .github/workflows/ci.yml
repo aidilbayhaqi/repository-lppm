@@ -48,7 +48,7 @@ jobs:
       - name: Release safety policies and tooling regressions
         run: |
           node tools/release-safety.mjs --source .
-          node --test tests/Tooling/release-safety.test.mjs
+          node --test tests/Tooling/*.test.mjs
       - run: composer install --prefer-dist --no-interaction --no-progress
       - run: composer validate --strict
       - run: cp .env.example .env
@@ -76,3 +76,33 @@ jobs:
         run: |
           docker build --target app -t osdj-app .
           docker build --target web -t osdj-web .
+      # Generate SBOMs from the *same images* that passed the production build.
+      # Pins verified against the official Anchore release tag v0.24.3.
+      # Syft version is fixed; the action never uses a mutable upstream tag.
+      - name: Generate application image SBOM (CycloneDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: osdj-app:latest
+          format: cyclonedx-json
+          syft-version: v1.57.2
+          output-file: osdj-app.cdx.json
+          artifact-name: osdj-app-cyclonedx-sbom
+          upload-artifact: true
+          upload-release-assets: false
+          dependency-snapshot: false
+      - name: Validate application SBOM
+        run: node tools/verify-sbom.mjs osdj-app.cdx.json
+      - name: Generate Nginx image SBOM (CycloneDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: osdj-web:latest
+          format: cyclonedx-json
+          syft-version: v1.57.2
+          output-file: osdj-web.cdx.json
+          artifact-name: osdj-web-cyclonedx-sbom
+          upload-artifact: true
+          upload-release-assets: false
+          dependency-snapshot: false
+      - name: Validate Nginx SBOM
+        run: node tools/verify-sbom.mjs osdj-web.cdx.json
+

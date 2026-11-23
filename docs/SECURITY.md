@@ -59,6 +59,10 @@ Pembuatan referensi hanya dijalankan setelah policy dan versi karya diperiksa, d
 
 Admin boleh memverifikasi karya sendiri hanya dengan alasan wajib dan audit khusus; verifier tetap dilarang. Ini merupakan pengecualian peran yang eksplisit, bukan pencabutan pemeriksaan status atau lock_version. Keputusan institusi yang membutuhkan dua orang berbeda tetap memerlukan penggunaan verifier independen.
 
+## Kuota penyimpanan PDF
+
+Setiap karya memiliki pembatasan untuk **dokumen baru**, **versi per dokumen**, dan **total bytes yang tersimpan**. Nilai awal adalah 50 dokumen/karya, 20 versi/dokumen dan 500 MB/karya; dapat disesuaikan dengan `DOCUMENT_MAX_FILES_PER_WORK`, `DOCUMENT_MAX_VERSIONS_PER_FILE`, serta `DOCUMENT_MAX_STORAGE_MB_PER_WORK` sebelum deployment. Kuota menghitung dokumen soft-deleted dan seluruh versi retained (termasuk dokumen legacy tanpa version row). Upload dalam transaksi memakai row lock karya agar permintaan bersamaan tidak melampaui kuota, dan upload yang ditolak akan membuang file sementara yang sempat tersimpan. Tidak ada penghapusan otomatis atau perubahan migration. Batas ini adalah baseline proteksi resource, bukan pengganti monitoring disk, quota per-user, dan policy retensi yang disetujui institusi. Jika dataset lama melebihi kuota, file tidak dihapus tetapi upload tambahan ditolak sampai pengelola meninjau kebijakan.
+
 ## File PDF
 
 PDF maksimal 20 MB, harus lolos MIME/signature check. Di production, ClamAV memeriksa stream sebelum bytes diterima ke disk privat. Malware, timeout, scanner mati, atau respons tidak dikenal menyebabkan upload ditolak. Tidak ada karantina asynchronous; file temporary HTTP tetap dikelola PHP dan tidak dipublikasikan.

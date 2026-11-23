@@ -42,6 +42,25 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_login_rejects_array_email_as_validation_error_not_server_failure(): void
+    {
+        $this->post('/login', [
+            'email' => ['admin@example.test'],
+            'password' => 'password',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
+    public function test_password_reset_rejects_array_email_before_processing(): void
+    {
+        $this->post('/forgot-password', [
+            'email' => ['admin@example.test'],
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();

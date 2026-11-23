@@ -28,16 +28,28 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', function (Request $request) {
             return [
                 Limit::perMinute(20)->by('login-ip:'.$request->ip()),
-                Limit::perMinute(10)->by('login-account:'.hash('sha256', mb_strtolower(trim((string) $request->input('email'))))),
+                Limit::perMinute(10)->by('login-account:'.self::normalizedAccountKey($request)),
             ];
         });
         RateLimiter::for('auth-requests', fn (Request $request) => [
             Limit::perMinute(5)->by('auth-ip:'.$request->ip()),
-            Limit::perHour(10)->by('auth-account:'.hash('sha256', mb_strtolower(trim((string) $request->input('email'))))),
+            Limit::perHour(10)->by('auth-account:'.self::normalizedAccountKey($request)),
         ]);
         Gate::policy(Buku::class, WorkPolicy::class);
         Gate::policy(KekayaanIntelektual::class, WorkPolicy::class);
         Gate::define('manage-reference', fn (User $user) => $user->isActive() && $user->isStaff());
         Gate::define('manage-users', fn (User $user) => $user->isActive() && $user->isAdmin());
     }
+    /**
+     * Route throttling runs before FormRequest validation. Never cast an array
+     * or object supplied as email to string (PHP warning / ErrorException).
+     * Invalid shapes share one account bucket, with the IP limiter still active.
+     */
+    private static function normalizedAccountKey(Request $request): string
+    {
+        $email = $request->input('email');
+
+        return hash('sha256', is_string($email) ? mb_strtolower(trim($email)) : '[invalid-email-input]');
+    }
+
 }

@@ -48,7 +48,7 @@ jobs:
       - name: Release safety policies and tooling regressions
         run: |
           node tools/release-safety.mjs --source .
-          node --test tests/Tooling/release-safety.test.mjs
+          node --test tests/Tooling/*.test.mjs
       - run: composer install --prefer-dist --no-interaction --no-progress
       - run: composer validate --strict
       - run: cp .env.example .env

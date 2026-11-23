@@ -72,6 +72,15 @@ ClamAV memerlukan waktu mengunduh/memuat signature. Upload gagal dengan aman sam
 - Log production ke stderr dengan request ID. Batasi akses dan retensi. Jangan membuka debug mode di internet.
 - Alert awal: lonjakan 5xx/login gagal, queue age >5 menit, disk >80%, Redis mendekati batas, backup gagal, dan certificate mendekati expiry. Nilai ambang perlu dituning.
 
+## Monitor operasional (OWASP A09/A10)
+
+Command `php artisan repository:monitor-security` melakukan probe read-only tiap lima menit **hanya saat APP_ENV=production** melalui scheduler Compose yang sudah ada: SQL koneksi MySQL, write/read/delete cache Redis, disk privat dan ruang kosong, umur pekerjaan queue database, failed jobs, serta ClamAV ketika pemindaian diwajibkan. Output terbatas `[OK]/[FAIL]` per komponen. Jika ada masalah, exit code nonzero serta event `security.monitor_degraded` (critical) berisi **nama komponen saja**, tanpa URL, token, password, stack trace, atau isi file. Error per-probe juga dicatat sebagai kategori exception tanpa detail koneksi.
+
+Default threshold: antrean siap diproses lebih tua 5 menit, failed jobs lebih dari 0, dan ruang kosong volume privat kurang dari 10%. Atur `MONITOR_MAX_QUEUE_WAIT_MINUTES`, `MONITOR_MAX_FAILED_JOBS`, dan `MONITOR_MIN_FREE_DISK_PERCENT` menurut SLO institusi. Pastikan scheduler hanya berjalan satu instance dengan Redis lock. Tidak memproses ulang failed jobs atau mengubah karya/dokumen. Jika queue diganti menjadi selain database atau disk diganti ke remote tanpa probe khusus, command **fail-closed** hingga monitor dikembangkan untuk driver tersebut.
+
+**Monitoring belum berarti alert sudah terkirim:** integrasikan `security.monitor_degraded` ke platform log collector/alert dan uji pengiriman end-to-end dengan simulasi terisolasi. Buat aturan deduplikasi (mis. 15 menit) agar gangguan berkepanjangan tidak men-spam operator. Tidak memeriksa SMTP delivery aktual, signature ClamAV age, TLS certificate, backup, maupun pemulihan data; semua wajib ditutup di staging acceptance.
+
+
 ## Backup dan restore
 
 Backup adalah tiga aset: database, private document volume termasuk semua versi, serta konfigurasi/APP_KEY. Database snapshot tanpa file bukan backup aplikasi lengkap. Gunakan job backup institusi, enkripsi, salinan off-host, retensi, akses terbatas, dan pemantauan kegagalan. Hindari password pada command line; gunakan file konfigurasi DB yang permission-nya dibatasi atau secret manager.

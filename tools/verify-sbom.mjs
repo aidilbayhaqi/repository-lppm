@@ -20,9 +20,8 @@ export function validateCycloneDx(sbom) {
   if (sbom.components.some(component =>
     !component || typeof component !== 'object'
     || (typeof component.name !== 'string' || !component.name.trim())
-    || (typeof component.version !== 'string' || !component.version.trim())
   )) {
-    return 'Komponen SBOM tanpa nama/versi ditemukan';
+    return 'Komponen SBOM tanpa nama ditemukan';
   }
   return null;
 }

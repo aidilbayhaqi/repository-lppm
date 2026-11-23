@@ -28,7 +28,12 @@ class LoginRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge(['email' => Str::lower(trim((string) $this->input('email')))]);
+        $email = $this->input('email');
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower(trim($email))]);
+        }
+        // Non-string inputs remain untouched so the validator can reject them
+        // without throwing an Array to string conversion ErrorException.
     }
 
     public function rules(): array

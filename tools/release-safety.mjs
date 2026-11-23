@@ -123,6 +123,59 @@ export function auditTrackedFiles(paths) {
 }
 
 
+
+/**
+ * Detect a narrow set of high-confidence active secrets in tracked text.
+ * The output is a category, NEVER the matched value or line content.
+ * This scans only the current checkout; it cannot remediate Git history.
+ */
+export function detectEmbeddedSecrets(content) {
+  if (typeof content !== 'string') return [];
+  const issues = [];
+  if (/^[ \t]*APP_KEY[ \t]*=[ \t]*(?:base64:[A-Za-z0-9+/]{43}=?|[A-Za-z0-9]{32})[ \t]*$/gm.test(content)) {
+    issues.push('laravel-app-key');
+  }
+  if (/-----BEGIN[ \t]+(?:RSA[ \t]+|EC[ \t]+|OPENSSH[ \t]+|ENCRYPTED[ \t]+)?PRIVATE[ \t]+KEY-----/.test(content)) {
+    issues.push('private-key');
+  }
+  if (/\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/.test(content)) {
+    issues.push('aws-access-key-id');
+  }
+  if (/\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{50,})\b/.test(content)) {
+    issues.push('github-token');
+  }
+  return issues;
+}
+
+const TEXT_SUFFIXES = /\.(?:php|blade\.php|js|mjs|cjs|ts|tsx|jsx|json|xml|ya?ml|md|txt|toml|ini|sh|ps1|py|sql|css|html|env\.example)$/i;
+const TEXT_BASENAMES = new Set(['Dockerfile', '.gitignore', '.dockerignore', '.npmrc', '.gitattributes']);
+
+/** Uses the Git index, not a glob that could accidentally scan local .env. */
+export function auditTrackedSecretContent(root, files) {
+  const findings = [];
+  for (const name of files) {
+    if (!TEXT_SUFFIXES.test(name) && !TEXT_BASENAMES.has(path.basename(name))) continue;
+    const full = path.join(root, name);
+    if (!fs.existsSync(full)) continue;
+    const stat = fs.lstatSync(full);
+    if (stat.isSymbolicLink()) {
+      findings.push({path: name, reason: 'tracked-text-symlink'});
+      continue;
+    }
+    if (!stat.isFile()) continue;
+    if (stat.size > 4 * 1024 * 1024) {
+      findings.push({path: name, reason: 'unscanned-oversized-text'});
+      continue;
+    }
+    const buffer = fs.readFileSync(full);
+    if (buffer.includes(0)) continue; // binary: requires a separate scanner
+    for (const reason of detectEmbeddedSecrets(buffer.toString('utf8'))) {
+      findings.push({path: name, reason});
+    }
+  }
+  return findings;
+}
+
 /** Reject movable upstream action tags; allow local composite actions. */
 export function auditWorkflowActionPins(workflow) {
   const issues = [];
@@ -168,10 +221,19 @@ export function main(args) {
     process.stderr.write('FAIL: tidak dapat memeriksa tracked files dengan git ls-files.\n');
     return 1;
   }
-  const trackedSecrets = auditTrackedFiles(index.stdout.split('\0').filter(Boolean));
+  const trackedPaths = index.stdout.split('\0').filter(Boolean);
+  const trackedSecrets = auditTrackedFiles(trackedPaths);
   if (trackedSecrets.length) {
     process.stderr.write('FAIL tracked sensitive runtime files (remove from Git index):\n');
     trackedSecrets.forEach(v => process.stderr.write(' - '+v+'\n'));
+    return 1;
+  }
+  const embeddedSecrets = auditTrackedSecretContent(root, trackedPaths);
+  if (embeddedSecrets.length) {
+    process.stderr.write('FAIL: possible active secrets in tracked files (values are hidden):\n');
+    for (const finding of embeddedSecrets) {
+      process.stderr.write(' - '+finding.path+' ['+finding.reason+']\n');
+    }
     return 1;
   }
   const workflowPath = path.join(root, '.github', 'workflows', 'ci.yml');

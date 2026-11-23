@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { auditEntries, auditDockerIgnore, auditTrackedFiles, auditWorkflowActionPins, classifyPath } from '../../tools/release-safety.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { auditEntries, auditDockerIgnore, auditTrackedFiles, auditTrackedSecretContent, detectEmbeddedSecrets, auditWorkflowActionPins, classifyPath } from '../../tools/release-safety.mjs';
 
 const forbidden = [
   ['OSDJ/.env', 'environment-secret'],
@@ -76,4 +79,27 @@ test('third-party workflow actions must use immutable commit pins', () => {
 
 test('local composite actions do not need external SHA pins', () => {
   assert.deepEqual(auditWorkflowActionPins('steps:\n - uses: ./.github/actions/verify\n'), []);
+});
+
+
+test('embedded APP_KEY and common credentials are recognized without revealing values', () => {
+  const sampleKey = Buffer.alloc(32, 7).toString('base64');
+  assert.deepEqual(detectEmbeddedSecrets('APP_KEY=base64:'+sampleKey), ['laravel-app-key']);
+  assert.deepEqual(detectEmbeddedSecrets('APP_KEY=\nMAIL_PASSWORD=\nDB_PASSWORD='), []);
+  const privateKeyHeader = '-----BEGIN ' + 'PRIVATE KEY-----';
+  assert.deepEqual(detectEmbeddedSecrets(privateKeyHeader), ['private-key']);
+  assert.deepEqual(detectEmbeddedSecrets('ghp_' + 'Z'.repeat(36)), ['github-token']);
+});
+
+test('source gate detects embedded credentials in tracked text, ignoring untracked local env', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'osdj-secret-gate-'));
+  try {
+    const sampleKey = Buffer.alloc(32, 9).toString('base64');
+    fs.writeFileSync(path.join(root, 'config.php'), 'APP_KEY=base64:'+sampleKey+'\n');
+    fs.writeFileSync(path.join(root, '.env'), 'APP_KEY=base64:'+sampleKey+'\n');
+    const found = auditTrackedSecretContent(root, ['config.php']);
+    assert.deepEqual(found, [{path: 'config.php', reason: 'laravel-app-key'}]);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });

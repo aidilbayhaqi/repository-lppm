@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -82,40 +83,55 @@ class MfaController extends Controller
         ]);
         $code = strtoupper(trim($input['code']));
 
-        $user = DB::transaction(function () use ($request, $code, $totp) {
-            $user = User::query()->lockForUpdate()->findOrFail($request->user()->id);
-            if (! $user->mfa_secret) {
-                throw ValidationException::withMessages(['code' => 'Aktifkan autentikasi dua faktor dahulu.']);
-            }
-            if (preg_match('/^\\d{6}$/D', $code)) {
-                $step = $totp->verifyStep($user->mfa_secret, $code);
-                if ($step === null || ($user->mfa_last_step !== null && $step <= $user->mfa_last_step)) {
-                    throw ValidationException::withMessages(['code' => 'Kode tidak valid atau sudah digunakan.']);
+        try {
+            $user = DB::transaction(function () use ($request, $code, $totp) {
+                $user = User::query()->lockForUpdate()->findOrFail($request->user()->id);
+                if (! $user->mfa_secret) {
+                    throw ValidationException::withMessages(['code' => 'Aktifkan autentikasi dua faktor dahulu.']);
                 }
-                $user->forceFill(['mfa_last_step' => $step])->save();
-            } else {
-                $hashes = $user->mfa_recovery_codes ?? [];
-                $match = null;
-                foreach ($hashes as $index => $hash) {
-                    if (Hash::check($code, $hash)) {
-                        $match = $index;
-                        break;
+                if (preg_match('/^\\d{6}$/D', $code)) {
+                    $step = $totp->verifyStep($user->mfa_secret, $code);
+                    if ($step === null || ($user->mfa_last_step !== null && $step <= $user->mfa_last_step)) {
+                        throw ValidationException::withMessages(['code' => 'Kode tidak valid atau sudah digunakan.']);
                     }
+                    $user->forceFill(['mfa_last_step' => $step])->save();
+                } else {
+                    $hashes = $user->mfa_recovery_codes ?? [];
+                    $match = null;
+                    foreach ($hashes as $index => $hash) {
+                        if (Hash::check($code, $hash)) {
+                            $match = $index;
+                            break;
+                        }
+                    }
+                    if ($match === null) {
+                        throw ValidationException::withMessages(['code' => 'Kode tidak valid atau sudah digunakan.']);
+                    }
+                    unset($hashes[$match]);
+                    $user->forceFill(['mfa_recovery_codes' => array_values($hashes)])->save();
+                    AuditLog::record($user, $user, 'mfa_recovery_used');
                 }
-                if ($match === null) {
-                    throw ValidationException::withMessages(['code' => 'Kode tidak valid atau sudah digunakan.']);
-                }
-                unset($hashes[$match]);
-                $user->forceFill(['mfa_recovery_codes' => array_values($hashes)])->save();
-                AuditLog::record($user, $user, 'mfa_recovery_used');
-            }
-            return $user;
-        }, 3);
+                return $user;
+            }, 3);
+        } catch (ValidationException $exception) {
+            // Never record the submitted TOTP/recovery code, secret or password.
+            Log::warning('security.mfa_challenge_failed', [
+                'user_id' => $request->user()?->id,
+                'ip' => $request->ip(),
+            ]);
+
+            throw $exception;
+        }
 
         Auth::setUser($user);
         SessionState::establish($request, $user);
         $request->session()->forget('auth.password_confirmed_at');
         $request->session()->put('security.mfa_verified', true);
+
+        Log::info('security.mfa_challenge_succeeded', [
+            'user_id' => $user->id,
+            'ip' => $request->ip(),
+        ]);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

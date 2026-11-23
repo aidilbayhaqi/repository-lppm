@@ -14,7 +14,20 @@ class HealthController extends Controller
     {
         try {
             DB::select('select 1');
-            Cache::get('repository:readiness');
+            // A successful cache read by itself may hide an unavailable Redis.
+            // Exercise both operations without exposing any dependency details.
+            $token = bin2hex(random_bytes(12));
+            $cacheKey = 'repository:readiness:'.$token;
+            if (Cache::put($cacheKey, $token, 10) !== true) {
+                throw new \RuntimeException('Readiness cache write failed.');
+            }
+            try {
+                if (Cache::get($cacheKey) !== $token) {
+                    throw new \RuntimeException('Readiness cache read failed.');
+                }
+            } finally {
+                Cache::forget($cacheKey);
+            }
             $disk = config('repository.documents_disk');
             $storage = Storage::disk($disk);
             $ready = config('filesystems.disks.'.$disk.'.driver') !== 'local'

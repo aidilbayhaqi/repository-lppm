@@ -66,10 +66,11 @@ ClamAV memerlukan waktu mengunduh/memuat signature. Upload gagal dengan aman sam
 
 ## Health dan observability
 
-- /up: liveness Laravel. /health: koneksi DB/cache dan kesiapan disk; hanya mengembalikan status umum, tanpa credentials.
+- /up: liveness Laravel. /health: koneksi DB, **probe cache write-read-delete**, dan kesiapan disk; hanya mengembalikan status umum, tanpa credentials. Kegagalan cache write/read atau storage menghasilkan 503. Probe membuat entri singkat bernama acak untuk menghindari benturan antar-replica; jangan gunakan endpoint ini untuk memeriksa queue lag atau SMTP.
 - Nginx memakai passive upstream failure handling, bukan active application health removal. Monitor /health dari luar dan tiap replica melalui jaringan tepercaya.
 - Catat HTTP p95, 4xx/5xx, CPU/RAM, koneksi DB, slow queries, disk, Redis memory, queue age, failed jobs, scanner/signature age, serta backup terakhir.
 - Log production ke stderr dengan request ID. Batasi akses dan retensi. Jangan membuka debug mode di internet.
+- MFA mencatat `security.mfa_challenge_failed` (warning) dan `security.mfa_challenge_succeeded` (info) dengan user_id dan IP, **tanpa OTP/recovery code, password, atau secret**. Integrasikan alert gagal MFA berulang pada log collector dan tetapkan retensi/akses yang terbatas.
 - Alert awal: lonjakan 5xx/login gagal, queue age >5 menit, disk >80%, Redis mendekati batas, backup gagal, dan certificate mendekati expiry. Nilai ambang perlu dituning.
 
 ## Backup dan restore

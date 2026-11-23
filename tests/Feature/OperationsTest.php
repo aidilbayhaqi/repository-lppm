@@ -118,6 +118,28 @@ class OperationsTest extends TestCase
         $audit->update(['action' => 'tampered']);
     }
 
+    public function test_health_returns_unavailable_when_cache_cannot_write(): void
+    {
+        Storage::fake(config('repository.documents_disk'));
+        \Illuminate\Support\Facades\Cache::shouldReceive('put')->once()->andReturn(false);
+
+        $this->get('/health')
+            ->assertStatus(503)
+            ->assertExactJson(['status' => 'unavailable']);
+    }
+
+    public function test_health_returns_unavailable_when_cache_cannot_read_written_value(): void
+    {
+        Storage::fake(config('repository.documents_disk'));
+        \Illuminate\Support\Facades\Cache::shouldReceive('put')->once()->andReturn(true);
+        \Illuminate\Support\Facades\Cache::shouldReceive('get')->once()->andReturn(null);
+        \Illuminate\Support\Facades\Cache::shouldReceive('forget')->once()->andReturn(true);
+
+        $this->get('/health')
+            ->assertStatus(503)
+            ->assertExactJson(['status' => 'unavailable']);
+    }
+
     public function test_health_check_returns_only_safe_status(): void
     {
         // A container test must not depend on the local document volume

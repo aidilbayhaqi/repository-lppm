@@ -51,7 +51,17 @@ class ProductionCheck extends Command
             'Idle session 1–30 menit; absolute 1–480 menit' => config('session.lifetime') >= 1 && config('session.lifetime') <= 30 && config('repository.session_absolute_minutes') >= 1 && config('repository.session_absolute_minutes') <= 480,
             'Session dan cache Redis bersama' => config('session.driver') === 'redis' && config('cache.default') === 'redis',
             'Session blocking Redis aktif' => config('session.block') && config('session.block_store') === 'redis',
-            'Queue asynchronous' => in_array(config('queue.default'), ['database', 'redis']),
+            // Production Compose worker explicitly runs queue:work database;
+            // a different QUEUE_CONNECTION would strand publication/email jobs.
+            'Queue database sesuai worker Compose' => config('queue.default') === 'database',
+            'Queue retry_after lebih besar dari worker timeout 60 detik' =>
+                (int) config('queue.connections.database.retry_after', 0) > 60,
+            // The security monitor reads failed_jobs; null/file drivers break triage.
+            'Failed jobs disimpan di database' => config('queue.failed.driver') === 'database-uuids',
+            'Logging production tidak dinonaktifkan' =>
+                filled(config('logging.default'))
+                && config('logging.default') !== 'null'
+                && array_key_exists((string) config('logging.default'), config('logging.channels', [])),
             'Email menggunakan SMTP/provider' => ! in_array(config('mail.default'), ['log', 'array']),
             'Alamat pengirim dan host SMTP terisi' => filled(config('mail.from.address')) && (config('mail.default') !== 'smtp' || filled(config('mail.mailers.smtp.host'))),
             'Verifikasi email aktif' => (bool) config('repository.require_verified_email'),

@@ -58,7 +58,7 @@ Migrasi additive tidak berarti downgrade kode otomatis aman: kode lama tidak men
 
 ## Worker, scheduler, dan batas resource
 
-Queue memakai database; timeout job 60 detik harus lebih pendek daripada retry_after (default 90). Tiga percobaan dan backoff 10/30/60 detik. Worker direstart berkala dengan max-time 3600. Supervisor/Compose menghidupkan ulang proses. Scheduler menjalankan recovery setiap lima menit, memakai onOneServer serta distributed lock Redis.
+Queue memakai database; timeout job 60 detik harus lebih pendek daripada retry_after (default 90). Production preflight sekarang menolak queue driver selain database, DB_QUEUE_RETRY_AFTER <= 60, failed job driver selain database-uuids, dan logging channel null/tidak dikenal. Alasannya worker Compose hanya memproses database queue dan security monitor membaca failed_jobs. Jika deployment beralih ke Redis queue, worker, monitor, preflight, SOP, dan tests harus diperbarui bersamaan. Tiga percobaan dan backoff 10/30/60 detik. Worker direstart berkala dengan max-time 3600. Supervisor/Compose menghidupkan ulang proses. Scheduler menjalankan recovery setiap lima menit, memakai onOneServer serta distributed lock Redis.
 
 Jangan menjalankan scheduler sistem dan service scheduler Compose sekaligus. Tinjau `queue:failed`, backlog jobs, dan publish_attempts sebelum retry. Job penerbitan idempotent per attempt, tetapi retry umum tetap harus dipahami berdasarkan job yang gagal. Redis noeviction menghindari penghapusan sesi diam-diam; monitor kapasitas karena Redis penuh menyebabkan operasi gagal. Sesuaikan RAM Redis dan PHP-FPM setelah pengukuran.
 

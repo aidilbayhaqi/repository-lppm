@@ -20,4 +20,7 @@ return [
     'clamav_host' => env('CLAMAV_HOST', '127.0.0.1'),
     'clamav_port' => (int) env('CLAMAV_PORT', 3310),
     'clamav_timeout' => (int) env('CLAMAV_TIMEOUT', 15),
+    'monitor_max_queue_wait_minutes' => max(1, (int) env('MONITOR_MAX_QUEUE_WAIT_MINUTES', 5)),
+    'monitor_max_failed_jobs' => max(0, (int) env('MONITOR_MAX_FAILED_JOBS', 0)),
+    'monitor_min_free_disk_percent' => min(90, max(1, (int) env('MONITOR_MIN_FREE_DISK_PERCENT', 10))),
 ];

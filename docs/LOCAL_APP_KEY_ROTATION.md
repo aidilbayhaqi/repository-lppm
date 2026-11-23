@@ -19,9 +19,9 @@ docker compose ps
 docker compose exec app php artisan repository:monitor-security
 ```
 
-Exit codes: `0` means the current local `.env.docker` key differs from parseable APP_KEY values found in the checked-out Git history of the old `.env.docker`; `1` means the current key matches a known exposed key; `2` means the comparison is **unverified** (missing file, invalid key, missing/truncated Git history, or read failure). Do not interpret `2` as success.
+Exit codes: `0` means the current local `.env.docker` key and any `APP_PREVIOUS_KEYS` differ from parseable APP_KEY values found in the checked-out Git history of the old `.env.docker`; `1` means a current or fallback key matches a known exposed key; `2` means the comparison is **unverified** (missing file, invalid key, missing/truncated Git history, or read failure). Do not interpret `2` as success.
 
-The tool reads the local env file and historical blobs **in memory** and prints only a pass/fail status. It does not write hashes, paste the key, or clean the original Git history. It intentionally does not run automatically in GitHub CI because that runner must never have access to developer runtime `.env.docker`.
+The tool checks `APP_KEY` and comma-separated `APP_PREVIOUS_KEYS`, then reads the local env file and historical blobs **in memory** and prints only a pass/fail status. It does not write hashes, paste the key, or clean the original Git history. It intentionally does not run automatically in GitHub CI because that runner must never have access to developer runtime `.env.docker`.
 
 Even a pass does **not** prove the container is using the new key, that encrypted data remain decryptable, or that the old key was not shared in other archives/clones. Confirm a fresh container rollout, normal login and application behavior, plus `repository:check-mfa-encryption` after that command is merged and deployed. Keep old key material in restricted recovery storage only as long as needed; production uses an independent generated key.
 

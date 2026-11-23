@@ -195,6 +195,64 @@ class ProductionSecurityTest extends TestCase
         $this->actingAs($user->fresh())->withSession($oldSession)->get('/admin/dashboard')->assertRedirect('/login');
     }
 
+
+    public function test_production_preflight_rejects_missing_database_and_redis_credentials(): void
+    {
+        $originalConnection = config('database.default');
+
+        try {
+            $this->app->instance('env', 'production');
+            config([
+                'database.default' => 'mysql',
+                'database.connections.mysql.username' => 'root',
+                'database.connections.mysql.password' => '',
+                'database.connections.mysql.url' => null,
+                'database.redis.default.url' => null,
+                'database.redis.cache.url' => null,
+                'database.redis.default.password' => null,
+                'database.redis.cache.password' => null,
+            ]);
+
+            $this->artisan('repository:production-check', ['--skip-services' => true])
+                ->expectsOutput('[FAIL] Database MySQL terpisah dari akun root')
+                ->expectsOutput('[FAIL] Database password nonkosong')
+                ->expectsOutput('[FAIL] Redis password terpasang')
+                ->assertFailed();
+
+            config([
+                'database.connections.mysql.username' => 'repository',
+                'database.connections.mysql.password' => 'only-for-tests',
+                'database.redis.default.password' => 'only-for-tests',
+                'database.redis.cache.password' => 'only-for-tests',
+            ]);
+
+            $this->artisan('repository:production-check', ['--skip-services' => true])
+                ->expectsOutput('[OK] Database MySQL terpisah dari akun root')
+                ->expectsOutput('[OK] Database password nonkosong')
+                ->expectsOutput('[OK] Redis password terpasang');
+        } finally {
+            // RefreshDatabase holds an SQLite transaction for the entire test.
+            // Never let a config-only preflight test change the connection used
+            // by tearDown and poison all later tests in the same process.
+            config(['database.default' => $originalConnection]);
+        }
+    }
+
+    public function test_production_preflight_rejects_invalid_app_key(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['app.key' => 'short-and-predictable']);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[FAIL] APP_KEY valid 32 byte')
+            ->assertFailed();
+
+        config(['app.key' => 'base64:'.base64_encode(random_bytes(32))]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[OK] APP_KEY valid 32 byte');
+    }
+
     public function test_production_preflight_requires_privileged_mfa(): void
     {
         $this->app->instance('env', 'production');

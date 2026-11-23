@@ -27,6 +27,8 @@ docker compose --env-file .env.production -f compose.production.yml up -d app1 a
 docker compose --env-file .env.production -f compose.production.yml exec app1 php artisan repository:production-check
 ```
 
+**Security preflight:** sebelum deployment, periksa `repository:production-check --skip-services`. Perintah menolak APP_KEY yang tidak valid 32 byte, password MySQL/Redis kosong, koneksi DB bukan MySQL atau DB menggunakan root, serta MFA istimewa mati. Jangan masukkan nilai secrets dalam output, log atau issue. Untuk instalasi existing yang memakai DB_URL/REDIS_URL, validator mengambil user/password dari URL jika disediakan. Siapkan rollover APP_KEY terencana karena perubahan kunci mendadak dapat merusak data terenkripsi.
+
 Admin menerima verifikasi email melalui queue. Worker dan SMTP harus berjalan; jika pesan belum sampai, gunakan kirim ulang pada halaman verifikasi. Jangan memalsukan email_verified_at untuk menghindari pengujian SMTP. Perintah production-check memeriksa konfigurasi, schema, database/cache, writability disk lokal, dan respons ClamAV. Exit nonzero harus diselidiki. `--skip-services` hanya memeriksa konfigurasi, bukan kesiapan seluruh stack.
 
 Entrypoint membuat cache config/route/view. Ia tidak membuat APP_KEY, tidak menjalankan migration otomatis, dan tidak melakukan seeding. Jalankan migration sekali per deployment, bukan pada setiap replica. Image PHP berjalan sebagai www-data. Root filesystem masih writable pada area container; jangan mengklaim image sepenuhnya read-only. Untuk reproducibility yang lebih kuat, pin digest image yang telah diuji oleh institusi dan simpan digest tersebut dalam catatan release.

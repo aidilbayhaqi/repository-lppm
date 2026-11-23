@@ -267,4 +267,57 @@ class ProductionSecurityTest extends TestCase
         $this->artisan('repository:production-check', ['--skip-services' => true])
             ->expectsOutput('[OK] MFA wajib untuk peran istimewa');
     }
+    public function test_production_preflight_rejects_queue_driver_mismatch(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['queue.default' => 'redis']);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[FAIL] Queue database sesuai worker Compose')
+            ->assertFailed();
+
+        config(['queue.default' => 'database']);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[OK] Queue database sesuai worker Compose');
+    }
+
+    public function test_production_preflight_rejects_too_short_queue_retry_after(): void
+    {
+        $this->app->instance('env', 'production');
+        config(['queue.connections.database.retry_after' => 30]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[FAIL] Queue retry_after lebih besar dari worker timeout 60 detik')
+            ->assertFailed();
+
+        config(['queue.connections.database.retry_after' => 90]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[OK] Queue retry_after lebih besar dari worker timeout 60 detik');
+    }
+
+    public function test_production_preflight_rejects_disabled_failed_jobs_and_logs(): void
+    {
+        $this->app->instance('env', 'production');
+        config([
+            'queue.failed.driver' => 'null',
+            'logging.default' => 'null',
+        ]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[FAIL] Failed jobs disimpan di database')
+            ->expectsOutput('[FAIL] Logging production tidak dinonaktifkan')
+            ->assertFailed();
+
+        config([
+            'queue.failed.driver' => 'database-uuids',
+            'logging.default' => 'stderr',
+        ]);
+
+        $this->artisan('repository:production-check', ['--skip-services' => true])
+            ->expectsOutput('[OK] Failed jobs disimpan di database')
+            ->expectsOutput('[OK] Logging production tidak dinonaktifkan');
+    }
+
 }

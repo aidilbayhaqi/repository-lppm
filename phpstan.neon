@@ -1,0 +1,23 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app
+
+    # Level 5 = tipe argumen + property + return. Level 6 menambah cek tipe
+    # hilang. Level 5 dipilih karena kode ini sengaja memakai Model generik
+    # di boundary service; level lebih tinggi butuh refactor besar dulu.
+    level: 5
+
+    excludePaths:
+        - app/Providers/*ServiceProvider.php
+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Eloquent find()/first() mengembalikan null saat tidak ketemu, tapi
+        # stub Larastan menandainya non-null. ?-> di sini BENAR dan diperlukan.
+        -
+            identifier: nullsafe.neverNull

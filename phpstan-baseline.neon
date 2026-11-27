@@ -1,0 +1,283 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#2 \$default of function old expects array\|Illuminate\\Database\\Eloquent\\Model\|string\|null, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Property App\\Models\\User\:\:\$email_verified_at \(Illuminate\\Support\\Carbon\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/Admin/UserController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Admin/WorkController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$repository_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/WorkflowController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DocumentVersion\:\:\$scan_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/DocumentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/DocumentController.php
+
+		-
+			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Http/Controllers/DocumentController.php
+
+		-
+			message: '#^Property App\\Models\\User\:\:\$email_verified_at \(Illuminate\\Support\\Carbon\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/ProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$archived_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/WorkCoverController.php
+
+		-
+			message: '#^PHPDoc tag @return with type array\<string, array\<mixed\>\|Illuminate\\Contracts\\Validation\\ValidationRule\|string\> is incompatible with native type void\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: app/Http/Requests/Auth/LoginRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$archived_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Policies/WorkPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_by\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Policies/WorkPolicy.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Dokumen\:\:\$scan_status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/DocumentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/DocumentService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:dokumen\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Services/DocumentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$aktif\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InlineReferenceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/InlineReferenceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$issn_cetak\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InlineReferenceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$issn_elektronik\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InlineReferenceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$archived_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$lock_version\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$repository_status\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\|Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Property App\\Models\\Publikasi\:\:\$repository_published_at \(Illuminate\\Support\\Carbon\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Services/PublicationWorkflow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$checksum\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$current_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$path_file\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$scan_status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$storage_disk\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/PublishingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WorkService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lock_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WorkService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WorkService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:dokumen\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/WorkService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/WorkService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lock_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WorkSubmissionService.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Illuminate\\Support\\Str\:\:headline\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/AuditHistoryPresenter.php
+
+		-
+			message: '#^Parameter \#2 \$field of static method App\\Support\\AuditHistoryPresenter\:\:formatValue\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Support/AuditHistoryPresenter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lock_version\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/OptimisticLock.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Dokumen\:\:\$scan_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/PublicationReadiness.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$archived_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Support/WorkType.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$public_visibility\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/WorkType.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Support/WorkType.php

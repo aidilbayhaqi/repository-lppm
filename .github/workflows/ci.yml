@@ -53,6 +53,8 @@ jobs:
       - run: composer validate --strict
       - name: Code style (Pint)
         run: php vendor/bin/pint --test
+      - name: Static analysis (Larastan)
+        run: php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress
       - run: cp .env.example .env
       - run: php artisan key:generate
       - run: npm ci --ignore-scripts

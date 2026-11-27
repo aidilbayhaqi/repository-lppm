@@ -1,8 +1,10 @@
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-document.querySelectorAll('form[data-requires-notes="true"] textarea[name="notes"]').forEach(input => { input.required = false; });
-
+// Form workflow meminta `notes` sebagai konfirmasi di dalam dialog Swal.
+// Textarea asli tetap `required` supaya request tanpa JS pun tidak lolos
+// kosong; atribut itu hanya dilepas sementara saat dialog mengambil alih
+// validasi, lalu dipasang balik bila dialog dibatalkan.
 const confirmed = new WeakSet();
 const pending = new WeakSet();
 const originals = new WeakMap();
@@ -47,7 +49,13 @@ document.addEventListener('submit', async event => {
             });
             pending.delete(form);
             if (result.isConfirmed && form.isConnected) {
-                if (notes) notes.value = String(result.value).trim();
+                if (notes) {
+                    notes.value = String(result.value).trim();
+                    // Dialog sudah memvalidasi isi; lepas `required` sekali agar
+                    // submit lanjutan tidak terblokir native constraint bila
+                    // textarea tersembunyi/tersembunyi-karena-layout.
+                    notes.required = false;
+                }
                 confirmed.add(form);
                 form.requestSubmit(submitter || undefined);
             }

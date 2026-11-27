@@ -49,3 +49,15 @@ Thumbs.db
 *.pem
 *.key
 # END OSDJ RELEASE SAFETY
+
+# Editor and manual-backup leftovers must never be committed.
+*.bak
+*.orig
+*.rej
+*~
+*.swp
+
+# Runtime locks and caches written by artisan commands.
+/storage/framework/*.lock
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore

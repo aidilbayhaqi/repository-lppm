@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,46 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string|null $abstrak
+ * @property Carbon $archived_at
+ * @property string $biaya
+ * @property Carbon $created_at
+ * @property string|null $doi
+ * @property int|null $fakultas_id
+ * @property string|null $halaman
+ * @property int $id
+ * @property int $indexing_year
+ * @property string $judul
+ * @property string|null $jurnal_id
+ * @property string|null $keterangan
+ * @property string|null $klasifikasi
+ * @property int $lock_version
+ * @property string|null $nomor
+ * @property int|null $program_studi_id
+ * @property Carbon $repository_published_at
+ * @property bool $scopus_indexed
+ * @property int $sinta_rank
+ * @property string|null $spmi
+ * @property string|null $status
+ * @property int $tahun_dasar
+ * @property int $tahun_publikasi
+ * @property Carbon $tanggal_publikasi
+ * @property string|null $tautan_eksternal
+ * @property string|null $tautan_google_scholar
+ * @property Carbon $updated_at
+ * @property string|null $volume
+ * @property-read Fakultas|null $fakultas
+ * @property-read ProgramStudi|null $programStudi
+ * @property-read Jurnal|null $jurnal
+ * @property-read Collection<int, Penulis>|null $penulis
+ * @property-read WorkCover|null $cover
+ * @property-read Collection<int, Dokumen>|null $dokumen
+ * @property-read Collection<int, Sitasi>|null $sitasi
+ * @property-read Collection<int, Pengindeks>|null $pengindeks
+ */
 class Publikasi extends Model
 {
     use HasFactory;

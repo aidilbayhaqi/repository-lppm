@@ -4,7 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $created_at
+ * @property int $id
+ * @property string|null $identifier
+ * @property int|null $program_studi_id
+ * @property string $requested_role
+ * @property string|null $review_note
+ * @property Carbon $reviewed_at
+ * @property int|null $reviewed_by
+ * @property string $status
+ * @property Carbon $updated_at
+ * @property int|null $user_id
+ * @property-read User|null $user
+ * @property-read ProgramStudi|null $programStudi
+ * @property-read User|null $reviewer
+ */
 class RegistrationRequest extends Model
 {
     protected $fillable = [

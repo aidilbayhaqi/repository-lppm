@@ -6,7 +6,25 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $created_at
+ * @property int $current_version
+ * @property int $id
+ * @property string|null $jenis_dokumen
+ * @property string|null $mime_type
+ * @property string $nama_file
+ * @property string|null $nama_file_asli
+ * @property string $path_file
+ * @property int $pemilik_dokumen_id
+ * @property string $pemilik_dokumen_type
+ * @property bool $publik
+ * @property Carbon $scanned_at
+ * @property int $ukuran_file
+ * @property Carbon $updated_at
+ * @property-read Model|null $pemilikDokumen
+ */
 class Dokumen extends Model
 {
     use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;

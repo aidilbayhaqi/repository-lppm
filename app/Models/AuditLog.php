@@ -4,7 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string $action
+ * @property Carbon $created_at
+ * @property string|null $description
+ * @property int $id
+ * @property array<int, mixed> $new_values
+ * @property array<int, mixed> $old_values
+ * @property int $subject_id
+ * @property string $subject_type
+ * @property int|null $user_id
+ * @property-read User|null $user
+ */
 class AuditLog extends Model
 {
     protected $guarded = ['id'];

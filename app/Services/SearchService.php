@@ -93,6 +93,9 @@ class SearchService
             'publikasi' => ['jurnal_id', 'journal_name_manual', 'publication_type', 'sinta_rank', 'scopus_indexed', 'scopus_quartile'],
             'buku' => ['penerbit_id'],
             'hki' => ['jenis'],
+            // Tipe tak dikenal: WorkType::model() sudah abort(404) lebih dulu,
+            // tapi match tanpa default melempar UnhandledMatchError, bukan 404.
+            default => abort(404),
         }];
     }
 

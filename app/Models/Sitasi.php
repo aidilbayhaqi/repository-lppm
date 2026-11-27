@@ -6,7 +6,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string|null $cakupan
+ * @property Carbon $created_at
+ * @property int $id
+ * @property int $jumlah_sitasi
+ * @property int|null $publikasi_id
+ * @property string|null $sumber
+ * @property int $tahun
+ * @property Carbon $updated_at
+ * @property-read Publikasi|null $publikasi
+ */
 class Sitasi extends Model
 {
     use HasFactory;

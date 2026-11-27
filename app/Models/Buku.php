@@ -3,13 +3,37 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $archived_at
+ * @property Carbon $created_at
+ * @property int $id
+ * @property string|null $isbn
+ * @property string $judul
+ * @property int $jumlah_halaman
+ * @property string|null $kategori
+ * @property string|null $keterangan
+ * @property int $lock_version
+ * @property string|null $penerbit_id
+ * @property Carbon $repository_published_at
+ * @property string|null $status
+ * @property int $tahun_publikasi
+ * @property Carbon $tanggal_publikasi
+ * @property string|null $tautan_eksternal
+ * @property Carbon $updated_at
+ * @property-read Penerbit|null $penerbit
+ * @property-read Collection<int, Penulis>|null $penulis
+ * @property-read WorkCover|null $cover
+ * @property-read Collection<int, Dokumen>|null $dokumen
+ */
 class Buku extends Model
 {
     use HasFactory;

@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Support\PasswordPolicy;
 use App\Services\RegistrationApprovalService;
+use App\Support\PasswordPolicy;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

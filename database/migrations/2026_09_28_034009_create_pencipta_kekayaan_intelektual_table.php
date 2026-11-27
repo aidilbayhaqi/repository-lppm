@@ -14,40 +14,40 @@ return new class extends Migration
         Schema::create('pencipta_kekayaan_intelektual', function (Blueprint $table) {
             $table->id();
 
-           $table->foreignId('kekayaan_intelektual_id')
-            ->constrained('kekayaan_intelektual')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+            $table->foreignId('kekayaan_intelektual_id')
+                ->constrained('kekayaan_intelektual')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-        $table->foreignId('penulis_id')
-            ->constrained('penulis')
-            ->cascadeOnUpdate()
-            ->restrictOnDelete();
+            $table->foreignId('penulis_id')
+                ->constrained('penulis')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
-        $table->unsignedInteger('urutan_pencipta');
+            $table->unsignedInteger('urutan_pencipta');
 
-        $table->timestamps();
+            $table->timestamps();
 
-        $table->unique(
-            [
-                'kekayaan_intelektual_id',
+            $table->unique(
+                [
+                    'kekayaan_intelektual_id',
+                    'penulis_id',
+                ],
+                'uniq_hki_pencipta'
+            );
+
+            $table->index(
+                [
+                    'kekayaan_intelektual_id',
+                    'urutan_pencipta',
+                ],
+                'idx_hki_urutan'
+            );
+
+            $table->index(
                 'penulis_id',
-            ],
-            'uniq_hki_pencipta'
-        );
-
-        $table->index(
-            [
-                'kekayaan_intelektual_id',
-                'urutan_pencipta',
-            ],
-            'idx_hki_urutan'
-        );
-
-        $table->index(
-            'penulis_id',
-            'idx_hki_penulis'
-        );
+                'idx_hki_penulis'
+            );
 
         });
     }

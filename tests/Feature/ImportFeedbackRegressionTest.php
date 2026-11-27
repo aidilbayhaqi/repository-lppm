@@ -27,7 +27,7 @@ class ImportFeedbackRegressionTest extends TestCase
     public function test_global_validation_feedback_and_import_row_errors_can_coexist(): void
     {
         [$user, $batch] = $this->invalidBatch();
-        $errors = new ViewErrorBag();
+        $errors = new ViewErrorBag;
         $errors->put('default', new MessageBag(['file' => ['Berkas perlu diperiksa kembali.']]));
 
         // The HTTP preview is already covered above. Render the real Blade page

@@ -51,6 +51,8 @@ jobs:
           node --test tests/Tooling/*.test.mjs
       - run: composer install --prefer-dist --no-interaction --no-progress
       - run: composer validate --strict
+      - name: Code style (Pint)
+        run: php vendor/bin/pint --test
       - run: cp .env.example .env
       - run: php artisan key:generate
       - run: npm ci --ignore-scripts

@@ -1,20 +1,21 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // The signed URL is proof of mailbox access; visiting it must never log the user in.
 // The success view is only available once after a valid verification in this browser.
-Route::get('verify-email/success', function (\Illuminate\Http\Request $request) {
+Route::get('verify-email/success', function (Request $request) {
     if (! $request->session()->pull('verification_success', false)) {
         return redirect()->route('login');
     }

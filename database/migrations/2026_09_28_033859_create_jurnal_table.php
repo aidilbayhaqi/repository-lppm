@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('jurnal', function (Blueprint $table) {
             $table->id();
 
-               $table->foreignId('penerbit_id')
+            $table->foreignId('penerbit_id')
                 ->nullable()
                 ->constrained('penerbit')
                 ->nullOnDelete()
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->index('penerbit_id');
             $table->index('issn_cetak');
             $table->index('issn_elektronik');
-            
+
             $table->timestamps();
         });
     }

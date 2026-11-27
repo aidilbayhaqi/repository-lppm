@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('publikasi_id')
-            ->constrained('publikasi')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+                ->constrained('publikasi')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->foreignId('penulis_id')
                 ->constrained('penulis')
@@ -50,7 +50,7 @@ return new class extends Migration
             ]);
 
             $table->index('penulis_id');
-            
+
         });
     }
 

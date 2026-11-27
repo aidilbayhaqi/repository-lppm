@@ -40,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-reference', fn (User $user) => $user->isActive() && $user->isStaff());
         Gate::define('manage-users', fn (User $user) => $user->isActive() && $user->isAdmin());
     }
+
     /**
      * Route throttling runs before FormRequest validation. Never cast an array
      * or object supplied as email to string (PHP warning / ErrorException).
@@ -51,5 +52,4 @@ class AppServiceProvider extends ServiceProvider
 
         return hash('sha256', is_string($email) ? mb_strtolower(trim($email)) : '[invalid-email-input]');
     }
-
 }

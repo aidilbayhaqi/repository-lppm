@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('penulis_id')
-            ->constrained('penulis')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+                ->constrained('penulis')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->string('institusi', 150);
             $table->string('departemen', 150)->nullable();

@@ -54,12 +54,10 @@ class ProductionCheck extends Command
             // Production Compose worker explicitly runs queue:work database;
             // a different QUEUE_CONNECTION would strand publication/email jobs.
             'Queue database sesuai worker Compose' => config('queue.default') === 'database',
-            'Queue retry_after lebih besar dari worker timeout 60 detik' =>
-                (int) config('queue.connections.database.retry_after', 0) > 60,
+            'Queue retry_after lebih besar dari worker timeout 60 detik' => (int) config('queue.connections.database.retry_after', 0) > 60,
             // The security monitor reads failed_jobs; null/file drivers break triage.
             'Failed jobs disimpan di database' => config('queue.failed.driver') === 'database-uuids',
-            'Logging production tidak dinonaktifkan' =>
-                filled(config('logging.default'))
+            'Logging production tidak dinonaktifkan' => filled(config('logging.default'))
                 && config('logging.default') !== 'null'
                 && array_key_exists((string) config('logging.default'), config('logging.channels', [])),
             'Email menggunakan SMTP/provider' => ! in_array(config('mail.default'), ['log', 'array']),
@@ -100,6 +98,7 @@ class ProductionCheck extends Command
 
         return in_array(false, $checks, true) ? self::FAILURE : self::SUCCESS;
     }
+
     private function hasValidKey(mixed $key): bool
     {
         if (! is_string($key)) {
@@ -113,5 +112,4 @@ class ProductionCheck extends Command
 
         return strlen($key) === 32;
     }
-
 }

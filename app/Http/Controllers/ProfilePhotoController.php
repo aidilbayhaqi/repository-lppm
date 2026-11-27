@@ -34,6 +34,7 @@ class ProfilePhotoController extends Controller
                 $previous = [$user->profile_photo_disk, $user->profile_photo_path];
                 $user->forceFill(['profile_photo_disk' => $disk, 'profile_photo_path' => $path])->save();
                 AuditLog::record($user, $user, 'profile_photo_updated');
+
                 return $previous;
             });
         } catch (\Throwable $e) {
@@ -43,6 +44,7 @@ class ProfilePhotoController extends Controller
         if ($old[0] && $old[1] && $old[1] !== $path) {
             Storage::disk($old[0])->delete($old[1]);
         }
+
         return back()->with('success', 'Foto profil diperbarui.');
     }
 
@@ -57,11 +59,13 @@ class ProfilePhotoController extends Controller
             $previous = [$user->profile_photo_disk, $user->profile_photo_path];
             $user->forceFill(['profile_photo_disk' => null, 'profile_photo_path' => null])->save();
             AuditLog::record($user, $user, 'profile_photo_removed');
+
             return $previous;
         });
         if ($old[0] && $old[1]) {
             Storage::disk($old[0])->delete($old[1]);
         }
+
         return back()->with('success', 'Foto profil dihapus.');
     }
 
@@ -72,6 +76,7 @@ class ProfilePhotoController extends Controller
         $disk = Storage::disk($user->profile_photo_disk);
         abort_unless($disk->exists($user->profile_photo_path), 404);
         $mime = strtolower(pathinfo($user->profile_photo_path, PATHINFO_EXTENSION)) === 'png' ? 'image/png' : 'image/jpeg';
+
         return $disk->response($user->profile_photo_path, null, [
             'Content-Type' => $mime,
             'Cache-Control' => 'private, no-store',

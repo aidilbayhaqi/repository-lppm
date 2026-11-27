@@ -11,10 +11,10 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LookupController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SessionSecurityController;
 use App\Http\Controllers\ProfilePhotoController;
-use App\Http\Controllers\WorkCoverController;
 use App\Http\Controllers\RepositoryController;
+use App\Http\Controllers\SessionSecurityController;
+use App\Http\Controllers\WorkCoverController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class)->name('health');

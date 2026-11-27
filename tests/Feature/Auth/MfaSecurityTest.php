@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Services\Totp;
+use App\Support\SessionState;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -118,7 +119,7 @@ class MfaSecurityTest extends TestCase
     {
         config(['repository.mfa_enabled' => false]);
         $user = User::factory()->create(['role' => 'mahasiswa']);
-        $original = \App\Support\SessionState::attributes($user);
+        $original = SessionState::attributes($user);
         $this->actingAs($user)->post(route('profile.sessions.revoke'), ['current_password' => 'wrong'])
             ->assertSessionHasErrors('current_password');
         $this->assertSame(0, $user->fresh()->auth_version);

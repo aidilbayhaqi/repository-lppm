@@ -195,7 +195,6 @@ class ProductionSecurityTest extends TestCase
         $this->actingAs($user->fresh())->withSession($oldSession)->get('/admin/dashboard')->assertRedirect('/login');
     }
 
-
     public function test_production_preflight_rejects_missing_database_and_redis_credentials(): void
     {
         $originalConnection = config('database.default');
@@ -267,6 +266,7 @@ class ProductionSecurityTest extends TestCase
         $this->artisan('repository:production-check', ['--skip-services' => true])
             ->expectsOutput('[OK] MFA wajib untuk peran istimewa');
     }
+
     public function test_production_preflight_rejects_queue_driver_mismatch(): void
     {
         $this->app->instance('env', 'production');
@@ -319,5 +319,4 @@ class ProductionSecurityTest extends TestCase
             ->expectsOutput('[OK] Failed jobs disimpan di database')
             ->expectsOutput('[OK] Logging production tidak dinonaktifkan');
     }
-
 }

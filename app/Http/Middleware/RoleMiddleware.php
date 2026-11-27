@@ -15,15 +15,15 @@ class RoleMiddleware
     ): Response {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             abort(401);
         }
 
-        if (!$user->is_active) {
+        if (! $user->is_active) {
             abort(403, 'Akun tidak aktif.');
         }
 
-        if (!in_array($user->role, $roles, true)) {
+        if (! in_array($user->role, $roles, true)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

@@ -14,61 +14,61 @@ return new class extends Migration
         Schema::create('pengindeksan_publikasi', function (Blueprint $table) {
             $table->id();
 
-               $table->foreignId('publikasi_id')
-        ->constrained('publikasi')
-        ->cascadeOnUpdate()
-        ->cascadeOnDelete();
+            $table->foreignId('publikasi_id')
+                ->constrained('publikasi')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-    $table->foreignId('pengindeks_id')
-        ->constrained('pengindeks')
-        ->cascadeOnUpdate()
-        ->restrictOnDelete();
+            $table->foreignId('pengindeks_id')
+                ->constrained('pengindeks')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
-    $table->foreignId('tingkat_pengindeksan_id')
-        ->nullable()
-        ->constrained('tingkat_pengindeksan')
-        ->nullOnDelete()
-        ->cascadeOnUpdate();
+            $table->foreignId('tingkat_pengindeksan_id')
+                ->nullable()
+                ->constrained('tingkat_pengindeksan')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
 
-    $table->string('tautan_sumber', 500)->nullable();
+            $table->string('tautan_sumber', 500)->nullable();
 
-    $table->string(
-        'tautan_sumber_internasional',
-        500
-    )->nullable();
+            $table->string(
+                'tautan_sumber_internasional',
+                500
+            )->nullable();
 
-    $table->text('keterangan')->nullable();
+            $table->text('keterangan')->nullable();
 
-    $table->boolean('final')->default(false);
+            $table->boolean('final')->default(false);
 
-    $table->date('tanggal_verifikasi')->nullable();
+            $table->date('tanggal_verifikasi')->nullable();
 
-    $table->timestamps();
+            $table->timestamps();
 
-    $table->unique(
-        [
-            'publikasi_id',
-            'pengindeks_id',
-            'tingkat_pengindeksan_id',
-        ],
-        'uniq_pub_pengindeks_tingkat'
-    );
+            $table->unique(
+                [
+                    'publikasi_id',
+                    'pengindeks_id',
+                    'tingkat_pengindeksan_id',
+                ],
+                'uniq_pub_pengindeks_tingkat'
+            );
 
-    $table->index(
-        'publikasi_id',
-        'idx_pengindeksan_pub'
-    );
+            $table->index(
+                'publikasi_id',
+                'idx_pengindeksan_pub'
+            );
 
-    $table->index(
-        'pengindeks_id',
-        'idx_pengindeksan_indeks'
-    );
+            $table->index(
+                'pengindeks_id',
+                'idx_pengindeksan_indeks'
+            );
 
-    $table->index(
-        'tingkat_pengindeksan_id',
-        'idx_pengindeksan_tingkat'
-    );
-            
+            $table->index(
+                'tingkat_pengindeksan_id',
+                'idx_pengindeksan_tingkat'
+            );
+
         });
     }
 

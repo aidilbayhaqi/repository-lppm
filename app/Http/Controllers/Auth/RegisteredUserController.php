@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -58,7 +59,7 @@ class RegisteredUserController extends Controller
                 ->whereHas('fakultas', fn ($q) => $q->where('aktif', true))
                 ->exists();
             if (! $validProgram) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
+                throw ValidationException::withMessages([
                     'program_studi_id' => 'Program studi harus berasal dari referensi aktif.',
                 ]);
             }

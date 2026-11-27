@@ -69,6 +69,7 @@ class DocumentSecurityTest extends TestCase
         $this->assertDatabaseCount('dokumen', 0);
         $this->assertSame([], Storage::disk('local')->allFiles());
     }
+
     public function test_unverified_owner_cannot_download_private_pdf_or_cover_when_verification_is_required(): void
     {
         Storage::fake('local');
@@ -172,7 +173,6 @@ class DocumentSecurityTest extends TestCase
         $this->actingAs($owner)->get(route('documents.download', $doc))->assertOk();
     }
 
-
     public function test_new_pdf_uploads_stop_at_per_work_document_limit_without_leaking_files(): void
     {
         Storage::fake('local');
@@ -256,6 +256,4 @@ class DocumentSecurityTest extends TestCase
         Storage::disk('local')->assertExists($path);
         $this->assertDatabaseCount('document_versions', 1);
     }
-
-
 }

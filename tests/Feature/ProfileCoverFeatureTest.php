@@ -42,8 +42,8 @@ class ProfileCoverFeatureTest extends TestCase
         $actor = User::factory()->admin()->create();
         $this->actingAs($actor);
         foreach ([['publikasi', Publikasi::factory()->draft()->create(['created_by' => $actor->id])->refresh()],
-                  ['buku', Buku::factory()->create(['created_by' => $actor->id])->refresh()],
-                  ['hki', KekayaanIntelektual::factory()->create(['created_by' => $actor->id])->refresh()]] as [$type, $work]) {
+            ['buku', Buku::factory()->create(['created_by' => $actor->id])->refresh()],
+            ['hki', KekayaanIntelektual::factory()->create(['created_by' => $actor->id])->refresh()]] as [$type, $work]) {
             $this->post(route('admin.works.cover.store', [$type, $work->id]), [
                 'cover' => $this->png(), 'lock_version' => $work->lock_version,
             ])->assertSessionHasNoErrors();

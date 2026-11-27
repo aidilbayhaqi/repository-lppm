@@ -12,58 +12,49 @@ return new class extends Migration
 
             $table->id();
 
-
             /**
              * Informasi utama penerbit
              */
             $table->string('nama', 150);
 
             $table->string('kode', 50)
-                  ->nullable()
-                  ->unique();
-
+                ->nullable()
+                ->unique();
 
             /**
              * Informasi kontak
              */
             $table->string('website', 255)
-                  ->nullable();
+                ->nullable();
 
             $table->string('email', 150)
-                  ->nullable();
+                ->nullable();
 
             $table->string('telepon', 50)
-                  ->nullable();
-
+                ->nullable();
 
             /**
              * Alamat penerbit
              */
             $table->text('alamat')
-                  ->nullable();
+                ->nullable();
 
-            $table->string('kota',100)
-                  ->nullable();
+            $table->string('kota', 100)
+                ->nullable();
 
-            $table->string('negara',100)
-                  ->default('Indonesia');
-
-
+            $table->string('negara', 100)
+                ->default('Indonesia');
 
             /**
              * Status data
              */
             $table->boolean('aktif')
-                  ->default(true);
-
-
+                ->default(true);
 
             /**
              * Audit
              */
             $table->timestamps();
-
-
 
             /**
              * Index
@@ -72,7 +63,6 @@ return new class extends Migration
 
         });
     }
-
 
     public function down(): void
     {

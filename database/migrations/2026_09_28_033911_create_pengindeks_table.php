@@ -32,7 +32,7 @@ return new class extends Migration
 
             $table->index('nama');
             $table->index('kategori');
-            
+
         });
     }
 

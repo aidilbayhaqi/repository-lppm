@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
-use App\Models\WorkCover;
 use App\Support\WorkType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -54,6 +53,7 @@ class WorkCoverController extends Controller
                 }
                 $work->increment('lock_version');
                 AuditLog::record($work, $request->user(), 'work_cover_updated', [], ['cover_updated' => true]);
+
                 return $oldFile;
             }, 3);
         } catch (\Throwable $e) {
@@ -63,6 +63,7 @@ class WorkCoverController extends Controller
         if ($previous && ($previous[0] !== $disk || $previous[1] !== $path)) {
             Storage::disk($previous[0])->delete($previous[1]);
         }
+
         return back()->with('success', 'Sampul karya berhasil diperbarui.');
     }
 
@@ -83,11 +84,13 @@ class WorkCoverController extends Controller
             $old->delete();
             $work->increment('lock_version');
             AuditLog::record($work, $request->user(), 'work_cover_removed');
+
             return $file;
         });
         if ($previous) {
             Storage::disk($previous[0])->delete($previous[1]);
         }
+
         return back()->with('success', 'Sampul karya dihapus.');
     }
 
@@ -103,6 +106,7 @@ class WorkCoverController extends Controller
         if (! $disk->exists($work->cover->path)) {
             return redirect(asset('images/cover-placeholder.svg'))->header('Cache-Control', 'private, no-store');
         }
+
         return $disk->response($work->cover->path, null, [
             'Content-Type' => 'image/png',
             'Cache-Control' => 'private, no-store', // Permission can change; never serve a stale public copy.

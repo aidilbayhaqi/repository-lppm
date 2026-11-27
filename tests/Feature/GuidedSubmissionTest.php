@@ -5,10 +5,10 @@ namespace Tests\Feature;
 use App\Models\Buku;
 use App\Models\Dosen;
 use App\Models\Fakultas;
-use App\Models\ProgramStudi;
 use App\Models\ImportBatch;
 use App\Models\Jurnal;
 use App\Models\Penulis;
+use App\Models\ProgramStudi;
 use App\Models\Publikasi;
 use App\Models\User;
 use App\Services\ImportService;
@@ -114,6 +114,7 @@ class GuidedSubmissionTest extends TestCase
         $this->assertDatabaseCount('fakultas', 1);
         $this->assertDatabaseCount('program_studi', 1);
     }
+
     public function test_manual_faculty_program_creation_from_submission_is_rejected(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'mahasiswa']));

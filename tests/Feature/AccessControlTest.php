@@ -39,7 +39,6 @@ class AccessControlTest extends TestCase
         $this->assertFalse(Gate::forUser($user)->allows('publish', $work));
     }
 
-
     public function test_reviewer_is_read_only_and_cannot_manage_accounts_or_verify_publications(): void
     {
         $reviewer = User::factory()->create(['role' => 'reviewer']);

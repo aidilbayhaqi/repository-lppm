@@ -34,7 +34,7 @@ return new class extends Migration
 
             $table->index('kategori');
             $table->index('urutan');
-            
+
         });
     }
 

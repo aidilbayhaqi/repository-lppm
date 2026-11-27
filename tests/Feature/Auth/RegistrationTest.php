@@ -8,7 +8,6 @@ use App\Models\ProgramStudi;
 use App\Models\RegistrationRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -160,7 +159,6 @@ class RegistrationTest extends TestCase
         $this->assertSame('pending', $registration->fresh()->status);
         $this->assertFalse($registration->user->fresh()->is_active);
     }
-
 
     public function test_registration_shows_two_cards_and_staff_role_requests(): void
     {

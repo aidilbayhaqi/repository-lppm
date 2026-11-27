@@ -14,40 +14,40 @@ return new class extends Migration
         Schema::create('buku', function (Blueprint $table) {
             $table->id();
 
-               $table->foreignId('penerbit_id')
-            ->nullable()
-            ->constrained('penerbit')
-            ->nullOnDelete()
-            ->cascadeOnUpdate();
+            $table->foreignId('penerbit_id')
+                ->nullable()
+                ->constrained('penerbit')
+                ->nullOnDelete()
+                ->cascadeOnUpdate();
 
-        $table->string('judul', 500);
+            $table->string('judul', 500);
 
-        $table->string('isbn', 50)->nullable();
+            $table->string('isbn', 50)->nullable();
 
-        $table->year('tahun_publikasi')->nullable();
+            $table->year('tahun_publikasi')->nullable();
 
-        $table->date('tanggal_publikasi')->nullable();
+            $table->date('tanggal_publikasi')->nullable();
 
-        $table->unsignedInteger('jumlah_halaman')->nullable();
+            $table->unsignedInteger('jumlah_halaman')->nullable();
 
-        $table->string('kategori', 100)->nullable();
+            $table->string('kategori', 100)->nullable();
 
-        $table->string('tautan_eksternal', 500)->nullable();
+            $table->string('tautan_eksternal', 500)->nullable();
 
-        $table->text('keterangan')->nullable();
+            $table->text('keterangan')->nullable();
 
-        $table->enum('status', [
-            'draft',
-            'dipublikasikan',
-        ])->default('draft');
+            $table->enum('status', [
+                'draft',
+                'dipublikasikan',
+            ])->default('draft');
 
-        $table->timestamps();
+            $table->timestamps();
 
-        $table->index('penerbit_id');
-        $table->index('tahun_publikasi');
-        $table->index('status');
+            $table->index('penerbit_id');
+            $table->index('tahun_publikasi');
+            $table->index('status');
 
-        $table->unique('isbn');
+            $table->unique('isbn');
 
         });
     }

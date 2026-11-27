@@ -52,41 +52,29 @@ class DocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' =>
-                'Silakan pilih file PDF yang ingin diunggah.',
+            'file.required' => 'Silakan pilih file PDF yang ingin diunggah.',
 
-            'file.file' =>
-                'File yang dipilih tidak valid.',
+            'file.file' => 'File yang dipilih tidak valid.',
 
-            'file.mimes' =>
-                'Hanya file PDF yang diperbolehkan.',
+            'file.mimes' => 'Hanya file PDF yang diperbolehkan.',
 
-            'file.mimetypes' =>
-                'Konten file harus berupa dokumen PDF.',
+            'file.mimetypes' => 'Konten file harus berupa dokumen PDF.',
 
-            'file.extensions' =>
-                'Ekstensi file harus .pdf.',
+            'file.extensions' => 'Ekstensi file harus .pdf.',
 
-            'file.max' =>
-                'Ukuran file PDF maksimal 20 MB.',
+            'file.max' => 'Ukuran file PDF maksimal 20 MB.',
 
-            'file.uploaded' =>
-                'Upload gagal. Periksa batas ukuran file pada server PHP.',
+            'file.uploaded' => 'Upload gagal. Periksa batas ukuran file pada server PHP.',
 
-            'publik.required' =>
-                'Pilih pengaturan akses dokumen.',
+            'publik.required' => 'Pilih pengaturan akses dokumen.',
 
-            'jenis_dokumen.required' =>
-                'Pilih jenis dokumen.',
+            'jenis_dokumen.required' => 'Pilih jenis dokumen.',
 
-            'jenis_dokumen.in' =>
-                'Jenis dokumen yang dipilih tidak tersedia.',
+            'jenis_dokumen.in' => 'Jenis dokumen yang dipilih tidak tersedia.',
 
-            'lock_version.required' =>
-                'Versi data tidak ditemukan. Muat ulang halaman.',
+            'lock_version.required' => 'Versi data tidak ditemukan. Muat ulang halaman.',
 
-            'lock_version.integer' =>
-                'Versi data tidak valid.',
+            'lock_version.integer' => 'Versi data tidak valid.',
         ];
     }
 }

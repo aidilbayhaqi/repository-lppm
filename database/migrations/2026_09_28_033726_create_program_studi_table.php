@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('program_studi', function (Blueprint $table) {
             $table->id();
 
-             $table->foreignId('fakultas_id')
+            $table->foreignId('fakultas_id')
                 ->constrained('fakultas')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();

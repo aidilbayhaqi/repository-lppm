@@ -14,40 +14,40 @@ return new class extends Migration
         Schema::create('sitasi', function (Blueprint $table) {
             $table->id();
 
-              $table->foreignId('publikasi_id')
-            ->constrained('publikasi')
-            ->cascadeOnUpdate()
-            ->cascadeOnDelete();
+            $table->foreignId('publikasi_id')
+                ->constrained('publikasi')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-        $table->year('tahun');
+            $table->year('tahun');
 
-        $table->enum('sumber', [
-            'google_scholar',
-            'scopus',
-            'sinta',
-            'lainnya',
-        ])->default('google_scholar');
+            $table->enum('sumber', [
+                'google_scholar',
+                'scopus',
+                'sinta',
+                'lainnya',
+            ])->default('google_scholar');
 
-        $table->enum('cakupan', [
-            'umum',
-            'nasional',
-            'internasional',
-        ])->default('umum');
+            $table->enum('cakupan', [
+                'umum',
+                'nasional',
+                'internasional',
+            ])->default('umum');
 
-        $table->unsignedInteger('jumlah_sitasi')->default(0);
+            $table->unsignedInteger('jumlah_sitasi')->default(0);
 
-        $table->timestamps();
+            $table->timestamps();
 
-        $table->unique([
-            'publikasi_id',
-            'tahun',
-            'sumber',
-            'cakupan',
-        ]);
+            $table->unique([
+                'publikasi_id',
+                'tahun',
+                'sumber',
+                'cakupan',
+            ]);
 
-        $table->index('tahun');
-        $table->index('sumber');
-        $table->index('cakupan');
+            $table->index('tahun');
+            $table->index('sumber');
+            $table->index('cakupan');
 
         });
     }

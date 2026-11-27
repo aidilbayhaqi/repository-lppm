@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('dosen', function (Blueprint $table) {
             $table->id();
 
-             $table->foreignId('program_studi_id')
+            $table->foreignId('program_studi_id')
                 ->constrained('program_studi')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
@@ -39,7 +39,6 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
-    
     {
         Schema::dropIfExists('dosen');
     }

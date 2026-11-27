@@ -73,6 +73,7 @@ final class InlineReferenceService
                 if (filled($row['program_studi_id'] ?? null)) {
                     $this->invalid("authors.$i.program_studi_id", 'Program studi hanya boleh dipilih untuk penulis berjenis dosen.');
                 }
+
                 continue;
             }
 

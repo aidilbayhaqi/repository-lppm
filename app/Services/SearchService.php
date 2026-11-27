@@ -118,6 +118,7 @@ class SearchService
                 'title' => $query->orderBy('judul'),
                 default => $query->orderByDesc(WorkType::year($type)),
             };
+
             return $query->orderBy('judul')->orderBy('id')
                 ->paginate(12)->withQueryString();
         }

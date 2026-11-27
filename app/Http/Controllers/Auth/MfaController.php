@@ -63,6 +63,7 @@ class MfaController extends Controller
                 'mfa_last_step' => null,
             ])->save();
             AuditLog::record($user, $user, 'mfa_enabled');
+
             return $user;
         });
 
@@ -109,6 +110,7 @@ class MfaController extends Controller
                 $user->forceFill(['mfa_recovery_codes' => array_values($hashes)])->save();
                 AuditLog::record($user, $user, 'mfa_recovery_used');
             }
+
             return $user;
         }, 3);
 
@@ -150,6 +152,7 @@ class MfaController extends Controller
             }
             $user->forceFill(['mfa_secret' => null, 'mfa_recovery_codes' => null, 'mfa_last_step' => null])->save();
             AuditLog::record($user, $user, 'mfa_disabled');
+
             return $user;
         }, 3);
         Auth::setUser($user);

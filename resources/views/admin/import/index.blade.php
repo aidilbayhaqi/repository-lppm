@@ -8,15 +8,15 @@
     </div>
     <div class="import-steps">
         <div><b>SIAPKAN</b>
-            <h3>Gunakan template</h3>
+            <h2>Gunakan template</h2>
             <p>Isi nama penulis baru beserta jenis dan NIDN untuk dosen, atau gunakan ID penulis yang tersedia.</p>
         </div>
         <div><b>PERIKSA</b>
-            <h3>Preview & validasi</h3>
+            <h2>Preview & validasi</h2>
             <p>Periksa metadata, duplikat, dan relasi. Semua error harus diperbaiki sebelum disimpan.</p>
         </div>
         <div><b>SIMPAN</b>
-            <h3>Simpan semua baris</h3>
+            <h2>Simpan semua baris</h2>
             <p>Data masuk sebagai draf dan tetap mengikuti proses verifikasi/penerbitan.</p>
         </div>
     </div>

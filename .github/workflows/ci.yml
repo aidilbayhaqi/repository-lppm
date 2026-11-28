@@ -105,4 +105,15 @@ jobs:
           dependency-snapshot: false
       - name: Validate Nginx SBOM
         run: node tools/verify-sbom.mjs osdj-web.cdx.json
+      - name: Create and verify build-to-SBOM release evidence
+        run: |
+          node tools/release-evidence.mjs create
+          node tools/release-evidence.mjs verify
+      - name: Upload image evidence manifest
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: osdj-release-evidence
+          path: release-evidence.json
+          if-no-files-found: error
+          retention-days: 30
 

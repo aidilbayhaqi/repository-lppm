@@ -56,3 +56,10 @@ SBOM membantu inventaris dan analisis CVE, **bukan** bukti image bebas vulnerabi
 The source gate now checks **tracked text files** for high-confidence embedded Laravel APP_KEY values, PEM private-key headers, GitHub PATs, and AWS access key identifiers. It prints only file paths and categories—not matched values, lines, or environment contents. Files beyond 4 MiB in recognized text formats and tracked symlinks cause a conservative failure. Files ignored by Git, including each developer's untracked .env, are not opened.
 
 This is deliberately a narrow preventive guard: it **does not scan historical commits**, does not detect every token/provider format, cannot certify absence of secrets, and does not replace dedicated GitHub secret scanning or a history-aware scanner. Existing APP_KEY previously committed in .env.docker remains an unresolved incident until the owner assesses usage, creates verified backups, rotates safely if necessary, and approves any coordinated history remediation. Never commit original key values, even in a ticket or fixture.
+
+
+## Release evidence manifest — OWASP A08
+
+Setelah image aplikasi dan Nginx di-build dan masing-masing CycloneDX SBOM divalidasi, CI membuat `release-evidence.json` berisi Git commit SHA, **local Docker image configuration IDs**, dan SHA-256 kedua SBOM. Tool `node tools/release-evidence.mjs create` lalu `verify` harus lulus; manifest disimpan sebagai artefak `osdj-release-evidence` dan dapat diperiksa bersama SBOM dari workflow run yang sama.
+
+**Penting:** ID image hasil `docker image inspect` adalah configuration digest image lokal, **bukan** registry manifest digest, signed artifact, atau bukti deploy menggunakan image yang sama. Untuk production, publikasikan/pin image registry dengan `repo@sha256:...`, buat attestation yang benar, dan verifikasi digest tersebut setelah promosi ke staging/production. Jangan menyimpulkan release supply chain siap hanya berdasarkan hash lokal ini.
